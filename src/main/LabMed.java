@@ -68,12 +68,6 @@ public class LabMed {
 	 */
 	public static void main(String[] args) throws Exception {	
 		
-		/*
-		DiFile test = new DiFile();
-		test.initFromFile("./CTHd010im");
-		*/
-		
-		
 		// the global image stack
 		_is = ImageStack.getInstance(); 		
 		_v2d = new Viewport2d();	

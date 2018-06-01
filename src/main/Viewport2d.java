@@ -36,6 +36,7 @@ public class Viewport2d extends Viewport implements Observer {
 	// width and heigth of our images. dont mix those with
 	// Viewport2D width / height or Panel2d width / height!
 	private int _w, _h;
+	private int _display_X,_display_Y;
 	/**
 	 * add some new variable in aufgabe2
 	 */
@@ -65,7 +66,10 @@ public class Viewport2d extends Viewport implements Observer {
 		}
 
 		public void mouseClicked ( java.awt.event.MouseEvent e ) { 
-			System.out.println("Panel2d::mouseClicked: x="+e.getX()+" y="+e.getY());
+			_display_X = e.getX();
+			_display_Y = e.getY();
+			regionGrow();
+			//System.out.println("Panel2d::mouseClicked: x="+e.getX()+" y="+e.getY());
 		}
 		public void mousePressed ( java.awt.event.MouseEvent e ) {}
 		public void mouseReleased( java.awt.event.MouseEvent e ) {}
@@ -153,6 +157,8 @@ public class Viewport2d extends Viewport implements Observer {
 		
 		_min_slider = 50; //exercise 3
 		_max_slider = 50;
+		_display_X = 0;
+		_display_Y = 0;
 		
 		_window_width = 4096;
 		_window_center = _window_width/2;
@@ -236,7 +242,8 @@ public class Viewport2d extends Viewport implements Observer {
 		for(String seg_name : _map_name_to_seg.keySet()) {		
 			Segment seg = _slices.getSegment(seg_name);
 			System.out.println("showing segment "+seg.getName()+" color: "+Integer.toHexString(seg.getColor()));			
-			seg.create_range_seg(_max_slider, _min_slider, _slices);
+			//seg.create_range_seg(_max_slider, _min_slider, _slices);
+			seg.create_range_seg(seg.getMaxSlider(), seg.getMinSlider(), _slices);
 			int active_id = _slices.getActiveImageID();
 			int[] pixel = dataProcess();
 			BufferedImage buffer= new BufferedImage(_w, _h, BufferedImage.TYPE_INT_ARGB);
@@ -350,7 +357,9 @@ public class Viewport2d extends Viewport implements Observer {
 			String seg_name = seg.getName();
 			boolean update_needed = _map_name_to_seg.containsKey(seg_name);
 			if (update_needed) {
-				//toggleSeg(seg);
+				_seg_name = seg_name;
+				_map_name_to_seg.get(_seg_name).setMaxSlider(seg.getMaxSlider());
+				_map_name_to_seg.get(_seg_name).setMinSlider(seg.getMinSlider());
 				update_view();
 			}
 		}
@@ -358,9 +367,14 @@ public class Viewport2d extends Viewport implements Observer {
 		if (m._type == Message.M_SEG_SLIDER) {
 			Segment seg = (Segment)m._obj;
 			_seg_name = seg.getName();
-			_max_slider = seg.getMaxSlider();
-			_min_slider = seg.getMinSlider();
-			update_view();
+			boolean update_needed = _map_name_to_seg.containsKey(_seg_name);
+			if (update_needed) {
+				_map_name_to_seg.get(_seg_name).setMaxSlider(seg.getMaxSlider());
+				_map_name_to_seg.get(_seg_name).setMinSlider(seg.getMinSlider());
+//				_max_slider = seg.getMaxSlider();
+//				_min_slider = seg.getMinSlider();
+				update_view();
+			}
 		}
 		if (m._type == Message.M_NEW_SETTING) {
 			int[] value = (int[])m._obj;
@@ -524,32 +538,12 @@ public class Viewport2d extends Viewport implements Observer {
 			bg_pixels[i] = pixel[i];
 		}
 	}
-
-	public void displaySegment(Segment seg) {
-		int active_img_id = _slices.getActiveImageID();
-		int[] pixel = dataProcess();
+	public void regionGrow() {
+		int x = (int)Math.rint(((double)_display_X)/DEF_WIDTH*_w);//get nearest Integer
+		int y = (int)Math.rint(((double)_display_Y)/DEF_HEIGHT*_h);
+		//System.out.println("x: "+x+ " y: "+y);
 		
-		final int[] bg_pixels = ((DataBufferInt) _bg_img.getRaster().getDataBuffer()).getData();
-		for (int i=0; i<pixel.length; i++) {
-			_bg_img.setRGB(i/_w,i%_w,pixel[i]);
-		}
-//		for (int i=0; i<pixel.length; i++) {
-//			if(seg.getMask(active_img_id).get(i/_w, i%_w)) {
-//				_bg_img.setRGB(i%_w,i/_w,pixel[i]);
-//			}else {
-//				_bg_img.setRGB(i%_w,i/_w,0xff000000);
-//			}			
-//		}
-		/*
-		 final int[] bg_pixels = ((DataBufferInt) _bg_img.getRaster().getDataBuffer()).getData();
-			for (int i=0; i<bg_pixels.length; i++) {
-				if(seg.getMask(active_img_id).get(i/_w, i%_w)) {
-					bg_pixels[i] = pixel[i];
-				}					
-				else {
-					bg_pixels[i] = 0xff000000;
-				}
-			}
-		*/
-	}
+		
+		
+	}	
 }

@@ -801,7 +801,7 @@ public final class DiDi {
 		_databoard_map.put(0x60003000, new TagMetaData(OW, "Overlay Data"));
 		_databoard_map.put(0x60004000, new TagMetaData(SH, "Group 6000 Comments (RET)"));
 		_databoard_map.put(0x7FE00000, new TagMetaData(UL, "Group 7FE0 Length"));
-		_databoard_map.put(0x7FE00010, new TagMetaData(OX, "Pixel Data"));
+		_databoard_map.put(0x7FE00010, new TagMetaData(OW, "Pixel Data"));
 		_databoard_map.put(0xFFFEE000, new TagMetaData(DL, "Item"));
 		_databoard_map.put(0xFFFEE00D, new TagMetaData(DL, "Item Delimitation Item"));
 		_databoard_map.put(0xFFFEE0DD, new TagMetaData(DL, "Sequence Delimitation Item"));

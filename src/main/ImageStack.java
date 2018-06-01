@@ -92,7 +92,7 @@ public class ImageStack extends Observable {
 		
 		// loading thread
 		Thread t = new Thread() {
-			JProgressBar progress_bar; //进度条
+			JProgressBar progress_bar; //
 			
 			// returns the image number of a dicom file or -1 if something wents wrong
 			private int check_file(File file) {
@@ -415,7 +415,7 @@ public class ImageStack extends Observable {
 	}
 	
 	/**
-	 * @author Tang
+	 * @author Xiao; Tang
 	 * @param df
 	 * @param active_id
 	 */
@@ -430,8 +430,8 @@ public class ImageStack extends Observable {
 		int it = 0;
 		Integer[][] board = new Integer[_h][_w];
 		for(int i=0;i<(prime_data.length)/2;i++) {			
-			prime_pixel[i] = (int)((prime_data[it+1] << 8)) + (int)((prime_data[it]));
-			//prime_pixel[i] = slope*prime_pixel[i] + intercept; // original data modification
+			prime_pixel[i] = (int)(((prime_data[it+1]&0xff) << 8)) + (int)((prime_data[it])&0xff);
+			prime_pixel[i] = slope*prime_pixel[i] + intercept; // original data modification
 			board[i%_w][i/_w] = prime_pixel[i];
 			it += 2;
 		}

@@ -1,10 +1,6 @@
 package main;
 
-
-import javax.swing.DefaultListModel;
-
 import misc.BitMask;
-import misc.DiFile;
 
 /**
  * This class represents a segment. Simply spoken, a segment has a unique name,
@@ -126,12 +122,12 @@ public class Segment {
 	 */
 	public void create_range_seg(int max, int min,ImageStack slices) {
 		int max_original = (1 << slices.getDiFile(0).getBitsStored())-1;
-		int grenz_min = (max_original/100)*min;
-		int grenz_max = (max_original/100)*max;
-		//System.out.println("grenz: "+grenz_min+" "+grenz_max);
+		int slope = slices.getDiFile(0).getSlope();
+		int intercept = slices.getDiFile(0).getIntercept();
+		int grenz_min = slope*((max_original/100)*min) + intercept;
+		int grenz_max = slope*((max_original/100)*max + (max_original%100)) + intercept;
 		int width = slices.getDiFile(0).getImageWidth();
 		int high = slices.getDiFile(0).getImageHeight();
-		//System.out.println("width: "+width+" high: "+high);
 		Integer[][] prime_pixel = new Integer[high][width];	
 		for(int layer=0;layer<_layers.length;layer++) {
 			prime_pixel = slices.get_volum_pixel_data(layer);
@@ -146,42 +142,8 @@ public class Segment {
 					//System.out.print(" "+prime_pixel[i][j]);
 				}
 				//System.out.println(" ");
-			}
-				
+			}				
 			//System.out.println("++++++++++++++++++++++++++++++++++++++");
 		}	
 	}
-	
-	/*
-	public void create_range_seg(int max, int min,ImageStack slices) {		
-		int active_img_id = slices.getActiveImageID();
-		DiFile active_file = slices.getDiFile(active_img_id);
-		int h_bild = active_file.getImageWidth();
-		int w_bild = active_file.getImageHeight();
-		int bitalloc = active_file.getBitsAllocated()/8;
-		int max_original = (1 << active_file.getBitsStored())-1;		
-//		this._max_slider = max;
-//		this._min_slider = min;
-		int grenz_min = (max_original/100)*min;
-		int grenz_max = (max_original/100)*max;
-		
-				
-		byte[] prime_data = new byte[bitalloc*h_bild*w_bild];
-		prime_data = active_file.getElement(0x7FE00010).getValues();		
-		int[] prime_pixel = new int[w_bild*h_bild];		
-		int it = 0;		
-		for(int i=0;i<prime_pixel.length;i++) {
-			prime_pixel[i] = (int)((prime_data[it+1] << 8)) + (int)((prime_data[it]));
-			it += 2;
-			if((prime_pixel[i]>=grenz_min) && (prime_pixel[i]<=grenz_max)) {
-				this.getMask(active_img_id).set(i/w_bild, i%w_bild, true);
-				//_layers[sequence].set(i/w_bild, i%w_bild, true);
-			}
-			else {
-				this.getMask(active_img_id).set(i/w_bild, i%w_bild, false);
-				//_layers[sequence].set(i/w_bild, i%w_bild, false);
-			}			
-		}	 
-	}
-	*/
 }
