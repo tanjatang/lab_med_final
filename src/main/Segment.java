@@ -113,7 +113,9 @@ public class Segment {
 	public void setColor(int color) {
 		_color = color;
 	}
-	
+	public void setBitmask(BitMask bit[]) {
+		_layers = bit;
+	}
 	/**
 	 * @author Xiao; Tang --exercise 3 
 	 * @param max
@@ -131,13 +133,13 @@ public class Segment {
 		Integer[][] prime_pixel = new Integer[high][width];	
 		for(int layer=0;layer<_layers.length;layer++) {
 			prime_pixel = slices.get_volum_pixel_data(layer);
-			for(int i=0;i<high;i++) {
-				for(int j=0;j<width;j++) {
-					if((prime_pixel[i][j]>=grenz_min) && (prime_pixel[i][j]<=grenz_max)) {
-						_layers[layer].set(i, j, true);
+			for(int h=0;h<high;h++) { //j:column,  i:row
+				for(int w=0;w<width;w++) {
+					if((prime_pixel[h][w]>=grenz_min) && (prime_pixel[h][w]<=grenz_max)) {
+						_layers[layer].set(w, h, true);
 					}
 					else {
-						_layers[layer].set(i, j, false);
+						_layers[layer].set(w, h, false);
 					}
 					//System.out.print(" "+prime_pixel[i][j]);
 				}

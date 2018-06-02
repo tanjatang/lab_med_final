@@ -1,6 +1,7 @@
 package main;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
@@ -51,6 +52,8 @@ public class Viewport2d extends Viewport implements Observer {
 
 	private int _window_width;
 	private int _window_center;
+	
+	private boolean _if_display_RGseg;
 	/**
 	 * Private class, implementing the GUI element for displaying the 2d data.
 	 * Implements the MouseListener Interface.
@@ -68,8 +71,13 @@ public class Viewport2d extends Viewport implements Observer {
 		public void mouseClicked ( java.awt.event.MouseEvent e ) { 
 			_display_X = e.getX();
 			_display_Y = e.getY();
-			regionGrow();
-			//System.out.println("Panel2d::mouseClicked: x="+e.getX()+" y="+e.getY());
+			if(_if_display_RGseg) {
+				regionGrow();
+			}	
+			else {
+				System.out.println("Panel2d::mouseClicked: x="+e.getX()+" y="+e.getY());
+			}
+			update_view();
 		}
 		public void mousePressed ( java.awt.event.MouseEvent e ) {}
 		public void mouseReleased( java.awt.event.MouseEvent e ) {}
@@ -159,10 +167,9 @@ public class Viewport2d extends Viewport implements Observer {
 		_max_slider = 50;
 		_display_X = 0;
 		_display_Y = 0;
-		
+		_if_display_RGseg = false;
 		_window_width = 4096;
-		_window_center = _window_width/2;
-		
+		_window_center = _window_width/2;		
 		_seg_name = new String();
 	}
 
@@ -221,7 +228,7 @@ public class Viewport2d extends Viewport implements Observer {
 				//System.out.println(active_file.getElement(0x00280004).getValueAsString());
 				switch(_viewmodel) {
 				case TRANSVERSAL: 
-					modusTransversal(null); break;
+					modusTransversal(); break;
 				case SAGITTAL:
 					modusSagittal(); break;
 				case FRONTAL:
@@ -250,12 +257,12 @@ public class Viewport2d extends Viewport implements Observer {
 			
 			switch(_viewmodel) {
 			case 0:{
-				for(int column=0;column<_h;column++) {
-					for(int row=0;row<_w;row++) {
-						if(seg.getMask(active_id).get(column, row))
-							buffer.setRGB(column,row,pixel[column*_w+row]&(0xff000000+seg.getColor()));
+				for(int h=0;h<_h;h++) {
+					for(int w=0;w<_w;w++) {
+						if(seg.getMask(active_id).get(w,h))
+							buffer.setRGB(w,h,pixel[h*_w+w]&(0xff000000+seg.getColor()));
 						else
-							buffer.setRGB(column,row,0xff000000);
+							buffer.setRGB(w,h,0xff000000);
 					}
 				}
 			}	break;
@@ -437,12 +444,13 @@ public class Viewport2d extends Viewport implements Observer {
 		_slices.initThreeViewModel(_viewmodel);
 		update_view();
 	}
-
+	
+	public void selectRegionGrowOrNot() {
+		
+		_if_display_RGseg = !_if_display_RGseg;
+	}
 	private int[] dataProcess() {
 		int active_img_id = _slices.getActiveImageID();
-//		int high_bit =_slices.getDiFile(0).getHighBit();		
-//		int max = 2<<high_bit;
-//		int window_center = max/2;	
 		int max = _window_width;
 		int window_center = _window_center;
 		Integer[][] prime_pixel = new Integer[_h][_w];
@@ -483,7 +491,7 @@ public class Viewport2d extends Viewport implements Observer {
 	 * set different model
 	 * @author xiao; Tang
 	 */
-	public void modusTransversal(Segment seg) {
+	public void modusTransversal() {
 		System.out.println("Viewmode "+"Transversal");
 		
 		int active_img_id = _slices.getActiveImageID();
@@ -493,57 +501,287 @@ public class Viewport2d extends Viewport implements Observer {
 		_h = active_file.getImageHeight();
 		_bg_img = new BufferedImage(_w, _h, BufferedImage.TYPE_INT_ARGB);
 		
-		int[] pixel = dataProcess();		
-		
-		//--------------------------------------------------------------
-		if(true) {//!_if_display_segment
+		int[] pixel = dataProcess();
+		if(_if_display_RGseg) {
+			for(int h=0;h<_h;h++) {
+				for(int w=0;w<_w;w++) {
+					if(_slices._seg_RegionGrow.getMask(active_img_id).get(w,h))
+						_bg_img.setRGB(w,h,pixel[h*_w+w]&(0xff000000+0xffff));
+					else
+						_bg_img.setRGB(w,h,0xff000000);
+				}
+			}
+		}else {
 			for (int i=0; i<pixel.length; i++) {
-				_bg_img.setRGB(i/_w,i%_w,pixel[i]);
+				_bg_img.setRGB(i%_w,i/_w,pixel[i]);
 				//_bg_img.setRGB(i/_w,i%_w,pixel[i]);
 			}
-		}				
-		/*
+		}
+		
+			
+			
+		/*--------------------------------------------------------------
 		final int[] bg_pixels = ((DataBufferInt) _bg_img.getRaster().getDataBuffer()).getData();
 		for (int i=0; i<bg_pixels.length; i++) {
 			bg_pixels[i] = pixel[i];
-		}	
-		*/	
+		}*/
+		
+		
 	}
 	
 	public void modusSagittal() {
 		System.out.println("Viewmode "+"Sagittal");
 
 		DiFile first_file = _slices.getDiFile(0);
+		int active_id = _slices.getActiveImageID();
 		_w = first_file.getImageHeight();
 		_h = _slices.getNumberOfImages();
 		_bg_img = new BufferedImage(_w, _h, BufferedImage.TYPE_INT_ARGB);	
 		int[] pixel = dataProcess();
-		final int[] bg_pixels = ((DataBufferInt) _bg_img.getRaster().getDataBuffer()).getData();
-		for (int i=0; i<bg_pixels.length; i++) {
-			bg_pixels[i] = pixel[i];
-			//bg_pixels[i] = 0xff000000;
-		}
+		if(_if_display_RGseg) { 
+			int width = _slices._seg_RegionGrow.getMask(0).get_h();
+			int high = _slices._seg_RegionGrow.getMaskNum();
+			for(int layer=0;layer<high;layer++) {
+				BitMask mask = _slices._seg_RegionGrow.getMask(layer);
+				for(int i=0;i<width;i++) {
+					if(mask.get(active_id,i))
+						_bg_img.setRGB(i,layer,pixel[layer*width+i]&(0xff000000+0xffff));
+					else
+						_bg_img.setRGB(i,layer,0xff000000);
+				}
+				
+			}
+		}else {
+			final int[] bg_pixels = ((DataBufferInt) _bg_img.getRaster().getDataBuffer()).getData();
+			for (int i=0; i<bg_pixels.length; i++) {
+				bg_pixels[i] = pixel[i];
+				//bg_pixels[i] = 0xff000000;
+			}
+		}	
 	}
 	
 	public void modusFrontal() {
 		System.out.println("Viewmode "+"Frontal");
 		
 		DiFile first_file = _slices.getDiFile(0);
+		int active_id = _slices.getActiveImageID();
 		_w = first_file.getImageWidth();
 		_h = _slices.getNumberOfImages();
 		_bg_img = new BufferedImage(_w, _h, BufferedImage.TYPE_INT_ARGB);
 		int[] pixel = dataProcess();
-		final int[] bg_pixels = ((DataBufferInt) _bg_img.getRaster().getDataBuffer()).getData();
-		for (int i=0; i<bg_pixels.length; i++) {
-			bg_pixels[i] = pixel[i];
-		}
+		if(_if_display_RGseg) {
+			int width = _slices._seg_RegionGrow.getMask(0).get_w();
+			int high = _slices._seg_RegionGrow.getMaskNum();
+			for(int layer=0;layer<high;layer++) {
+				BitMask mask = _slices._seg_RegionGrow.getMask(layer);
+				for(int i=0;i<width;i++) {
+					if(mask.get(i,active_id))
+						_bg_img.setRGB(i,layer,pixel[layer*width+i]&(0xff000000+0xffff));
+					else
+						_bg_img.setRGB(i,layer,0xff000000);
+				}				
+			}
+		}else {
+			final int[] bg_pixels = ((DataBufferInt) _bg_img.getRaster().getDataBuffer()).getData();
+			for (int i=0; i<bg_pixels.length; i++) {
+				bg_pixels[i] = pixel[i];
+			}
+		}		
 	}
+	
+	/**
+	 *  the region grow algorithms, exercise 4.2
+	 *  
+	 */
 	public void regionGrow() {
 		int x = (int)Math.rint(((double)_display_X)/DEF_WIDTH*_w);//get nearest Integer
 		int y = (int)Math.rint(((double)_display_Y)/DEF_HEIGHT*_h);
-		//System.out.println("x: "+x+ " y: "+y);
 		
+		int active_img_id = _slices.getActiveImageID();
+		int grauwert = 0;
+		switch (_viewmodel) {		
+		case TRANSVERSAL:{
+			grauwert = _slices.get_volum_pixel_data(active_img_id)[y][x];
+		}	break;		
+		case SAGITTAL:{
+			grauwert = _slices.get_sagittal_img(active_img_id)[y][x];
+		}	break;
+		case FRONTAL:{
+			grauwert = _slices.get_frontal_img(active_img_id)[y][x];
+		}	break;
+		default:
+			break;
+		}
 		
+		int v = (int)((double)grauwert/10);
+		int intension_min = 0;
+		int intension_max = 0;
+		int percent = 2; //20%
+		if(grauwert>0) {
+			intension_min = grauwert - percent*v;
+			intension_max = grauwert + percent*v;
+		}
+		else {
+			intension_min = grauwert + percent*v;
+			intension_max = grauwert - percent*v;
+		}
+		System.out.println("seed grauwert: "+grauwert+" intension_min: "+intension_min+" intension_max: "+intension_max);
 		
-	}	
+		int num_of_img = _slices.getNumberOfImages();
+		int size_flat = _slices.get_volum_pixel_data(0).length;
+		//---------------------------------------------
+		
+		BitMask[][] layer = new BitMask[2][num_of_img];
+		for(int i=0;i<2;i++)
+		for (int j=0; j<num_of_img; j++) {
+			layer[i][j] = new BitMask(size_flat,size_flat);
+		}
+		switch (_viewmodel) {		
+		case TRANSVERSAL:{
+			Algorithmus3d(layer,x,y,active_img_id,intension_min,intension_max);	//x y z 空间中的点坐标
+			}break;		
+		case SAGITTAL:{
+			Algorithmus3d(layer,active_img_id,x,y,intension_min,intension_max);
+		}	break;
+		case FRONTAL:{
+			Algorithmus3d(layer,x,active_img_id,y,intension_min,intension_max);
+		}	break;
+		default:
+			break;
+		}
+		_slices._seg_RegionGrow.setBitmask(layer[0]);
+		_slices._seg_RegionGrow.setName("RegionGrow");
+//		System.out.println(layer[0][active_img_id].toString());
+		//recursiveAlgorithmus3d(layer,x,y,active_img_id,intension_min,intension_max);
+		//---------------------------------------------
+		/*
+		BitMask[] layer = new BitMask[2];
+		for(int i=0;i<2;i++)
+			layer[i] = new BitMask(size_flat,size_flat);
+		recursiveAlgorithmus2d(layer,x,y,active_img_id,intension_min,intension_max);
+		*/
+	}
+	private void recursiveAlgorithmus2d(BitMask[] layer,int x,int y,int active,int i_min,int i_max) {
+		layer[1].set(x, y, true);
+		int size_flat = _slices.get_volum_pixel_data(0).length;
+		int grauwert = _slices.get_volum_pixel_data(active)[y][x];
+		if(grauwert>=i_min && grauwert<=i_max) {
+			layer[0].set(x, y, true);
+			if((x-1 >= -1) && (!layer[1].get(x-1, y))) {
+				recursiveAlgorithmus2d(layer,x-1,y,active,i_min,i_max);
+			}
+			if((x+1 <= size_flat) && (!layer[1].get(x+1, y))) {
+				recursiveAlgorithmus2d(layer,x-1,y,active,i_min,i_max);
+			}
+			if((y-1 >= -1) && (!layer[1].get(x, y-1))) {
+				recursiveAlgorithmus2d(layer,x,y-1,active,i_min,i_max);
+			}
+			if((y+1 <= size_flat) && (!layer[1].get(x, y+1))) {
+				recursiveAlgorithmus2d(layer,x,y+1,active,i_min,i_max);
+			}
+		}
+		else {
+			layer[0].set(x, y, false);
+			return;
+		}
+	}
+	private void recursiveAlgorithmus3d(BitMask[][] layer,int x,int y,int layer_num, int i_min,int i_max) { //相对于_volum_pixel_data中 x y的位置
+		if(layer[1][layer_num].get(x, y))
+			return;
+		layer[1][layer_num].set(x, y, true);
+		int size_flat = _slices.get_volum_pixel_data(0).length;
+		int size_vertical = _slices.getNumberOfImages();
+		int grauwert = _slices.get_volum_pixel_data(layer_num)[y][x];
+		if((grauwert>0&&grauwert>=i_min && grauwert<=i_max )			
+				//||(grauwert<0&&(grauwert<=i_min && grauwert>=i_max))
+				) {
+			layer[0][layer_num].set(x, y, true);
+			if((x-1 >= -1) && (!layer[1][layer_num].get(x-1, y))) {
+				recursiveAlgorithmus3d(layer,x-1,y,layer_num,i_min,i_max);
+			}
+			if((x+1 <= size_flat) && (!layer[1][layer_num].get(x+1, y))) {
+				recursiveAlgorithmus3d(layer,x+1,y,layer_num,i_min,i_max);
+			}
+			if((y-1 >= -1) && (!layer[1][layer_num].get(x, y-1))) {
+				recursiveAlgorithmus3d(layer,x,y-1,layer_num,i_min,i_max);
+			}
+			if ((y + 1 <= size_flat) && (!layer[1][layer_num].get(x, y + 1))) {
+				recursiveAlgorithmus3d(layer, x, y + 1, layer_num, i_min, i_max);
+			}
+//			if ((layer_num - 1 >= -1) && (!layer[1][layer_num - 1].get(x, y))) {
+//				recursiveAlgorithmus3d(layer, x, y, layer_num - 1, i_min, i_max);
+//			}
+//			if ((layer_num + 1 <= size_vertical) && (!layer[1][layer_num + 1].get(x, y))) {
+//				recursiveAlgorithmus(layer, x, y, layer_num + 1, i_min, i_max);
+//			}						
+		}
+		else {
+			layer[0][layer_num].set(x, y, false);
+			return;
+		}		
+	}
+
+	//BitMask[0][] for segment, BitMask[1][] flag for recursive state
+	private void Algorithmus3d(BitMask[][] layer,int x,int y,int layer_num, int i_min,int i_max) {
+		class Coordinate{
+			private int cx,cy,cz;
+			Coordinate(){
+				cx = 0;
+				cy = 0;
+				cz = 0;
+			}
+			Coordinate(int x,int y, int z){
+				cx = x;
+				cy = y;
+				cz = z;
+			}
+		};
+		
+		int size_flat = _slices.get_volum_pixel_data(0).length;
+		int size_vertical = _slices.getNumberOfImages();
+		Queue<Coordinate> will_be_researched = new LinkedBlockingQueue<Coordinate>();				
+		will_be_researched.add(new Coordinate(x,y,layer_num));
+		layer[1][layer_num].set(x,y,true);
+		Coordinate current = new Coordinate();
+		do {
+			current = will_be_researched.remove();
+			
+			int x_ = current.cx;
+			int y_ = current.cy;
+			int z_ = current.cz;			
+			int grauwert = _slices.get_volum_pixel_data(z_)[y_][x_];
+			if((grauwert>=i_min && grauwert<=i_max )){
+				layer[0][z_].set(x_, y_, true);
+				if((x_ > 0)&&(!layer[1][z_].get(x_-1, y_))) {
+					will_be_researched.add(new Coordinate(x_-1, y_, z_));
+					layer[1][z_].set(x_-1,y_,true);
+				}
+				if((x_ < size_flat-1)&&(!layer[1][z_].get(x_+1, y_))) {
+					will_be_researched.add(new Coordinate(x_+1, y_, z_));
+					layer[1][z_].set(x_+1,y_,true);
+				}
+				if((y_ > 0)&&(!layer[1][z_].get(x_, y_-1))) {
+					will_be_researched.add(new Coordinate(x_, y_-1, z_));
+					layer[1][z_].set(x_,y_-1,true);
+				}
+				if((y_ < size_flat-1)&&(!layer[1][z_].get(x_, y_+1))) {
+					will_be_researched.add(new Coordinate(x_, y_+1, z_));
+					layer[1][z_].set(x_,y_+1,true);
+				}
+				if((z_ > 0)&&(!layer[1][z_-1].get(x_, y_))) {
+					will_be_researched.add(new Coordinate(x_, y_, z_-1));
+					layer[1][z_-1].set(x_,y_,true);
+				}
+				if((z_ < size_vertical-1)&&(!layer[1][z_+1].get(x_, y_))) {
+					will_be_researched.add(new Coordinate(x_, y_, z_+1));
+					layer[1][z_+1].set(x_,y_,true);
+				}
+			}
+			else {
+				layer[0][z_].set(x_, y_, false);
+			}		
+		//System.out.println("x: "+current.cx+" y: "+current.cy+" z: "+current.cz );
+		}while(!will_be_researched.isEmpty());
+		
+	}
 }

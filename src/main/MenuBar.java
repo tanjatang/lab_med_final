@@ -132,7 +132,14 @@ public class MenuBar extends JMenuBar {
 		item.addActionListener(newSegmentListener);
 		_menuTools.add(item);
 		
-		// addition in exercise 4
+		// addition in exercise 4.2
+		JRadioButtonMenuItem rb;
+		rb = new JRadioButtonMenuItem("RegionGrow Seg");
+		rb.addActionListener(selectRegionGrowListener);
+		_menuTools.add(rb);
+		rbMenuItem.setSelected(false);
+		
+		// addition in exercise 4.1
 		item = new JMenuItem(new String("Setting"));
 		item.addActionListener(setWindowWidthCenterListener);
 		_menuTools.add(item);
@@ -269,6 +276,11 @@ public class MenuBar extends JMenuBar {
 		public void actionPerformed(ActionEvent event) {	
 			//_tools.showTool(new ToolWindowSelector());
 			new ToolWindowSelector();
+		}
+	};
+	ActionListener selectRegionGrowListener = new ActionListener() {
+		public void actionPerformed(ActionEvent event) {	
+			_v2d.selectRegionGrowOrNot();
 		}
 	};	
 

@@ -24,7 +24,8 @@ public class ImageStack extends Observable {
 	private Hashtable<String, Segment> _segment;
 	private String _dir_name;
 	private int _w, _h, _active;
-	
+	public Segment _seg_RegionGrow;
+
 	//for different model
 	private Map<Integer,Integer[][]> _volum_pixel_data;
 	private Vector<Integer[][]> _transversal_img;
@@ -70,6 +71,7 @@ public class ImageStack extends Observable {
 		_sagittal_img = new Vector<Integer[][]>();
 		_frontal_img = new Vector<Integer[][]>();
 		_transversal_img = new Vector<Integer[][]>();
+		_seg_RegionGrow = new Segment(" ", _w, _h, _dicom_files.size());
 	}
 
 	public static ImageStack getInstance() {
@@ -382,7 +384,7 @@ public class ImageStack extends Observable {
 				for(int layer=0;layer<_volum_pixel_data.size();layer++) {
 					Integer[][] board = _volum_pixel_data.get(layer);
 					for(int i=0;i<width;i++) {
-						sagittal[layer][i] = board[num][i];
+						sagittal[layer][i] = board[i][num];
 					}
 				}
 				_sagittal_img.addElement(sagittal);
@@ -401,7 +403,7 @@ public class ImageStack extends Observable {
 				for(int layer=0;layer<_volum_pixel_data.size();layer++) {
 					Integer[][] board = _volum_pixel_data.get(layer);
 					for(int i=0;i<width;i++) {
-						frontal[layer][i] = board[i][h];
+						frontal[layer][i] = board[h][i];
 					}
 				}
 				_frontal_img.addElement(frontal);
@@ -432,7 +434,8 @@ public class ImageStack extends Observable {
 		for(int i=0;i<(prime_data.length)/2;i++) {			
 			prime_pixel[i] = (int)(((prime_data[it+1]&0xff) << 8)) + (int)((prime_data[it])&0xff);
 			prime_pixel[i] = slope*prime_pixel[i] + intercept; // original data modification
-			board[i%_w][i/_w] = prime_pixel[i];
+			//board[i%_w][i/_w] = prime_pixel[i];
+			board[i/_w][i%_w] = prime_pixel[i];
 			it += 2;
 		}
 		_volum_pixel_data.put(active_id, board);	

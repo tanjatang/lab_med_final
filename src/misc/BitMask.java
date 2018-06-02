@@ -17,6 +17,7 @@ public class BitMask {
 	 * @param w	width
 	 * @param h	heigth
 	 */
+	public BitMask() {}
 	public BitMask(int w, int h) {
 		_w = w;
 		_h = h;
