@@ -16,6 +16,9 @@ public class Segment {
 	private int _h;				// Bitmask height
 	private BitMask[] _layers;	// each segment contains an array of n bitmasks
 	
+	public BitMask[] get_bitMaskArray() {
+		return _layers;
+	}
 	private int _max_slider,_min_slider;
 	public void setMaxSlider(int max) {
 		_max_slider = max;

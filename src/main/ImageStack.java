@@ -325,7 +325,20 @@ public class ImageStack extends Observable {
  	 * @author Xiao Tang
 	 * @param seg
 	 */
-	void setSegSlider(Segment seg) {
+//	void setSegSlider(Segment seg) {
+//		Enumeration<Segment> segs = _segment.elements();
+//		
+//		while (segs.hasMoreElements()) 	{
+//			if(segs.nextElement().getName()==seg.getName()) {
+//				this.getSegment(seg.getName()).setMaxSlider(seg.getMaxSlider());
+//				this.getSegment(seg.getName()).setMinSlider(seg.getMinSlider());
+//				
+//				setChanged();
+//			    notifyObservers(new Message(Message.M_SEG_SLIDER, new Segment(seg)));
+//			}			
+//		}		
+//	}
+	void segChanged(Segment seg) {
 		Enumeration<Segment> segs = _segment.elements();
 		
 		while (segs.hasMoreElements()) 	{
@@ -334,14 +347,9 @@ public class ImageStack extends Observable {
 				this.getSegment(seg.getName()).setMinSlider(seg.getMinSlider());
 				
 				setChanged();
-			    notifyObservers(new Message(Message.M_SEG_SLIDER, new Segment(seg)));
+			    notifyObservers(new Message(Message.M_SEG_CHANGED, new Segment(seg)));
 			}			
-		}		
-	}
-	void segChanged(Segment seg) {
-		
-		setChanged();
-	    notifyObservers(new Message(Message.M_SEG_CHANGED, new Segment(seg)));
+		}
 	}
 	
 	void widthCenterChanged(int[] value) {

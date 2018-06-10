@@ -89,7 +89,7 @@ public class Viewport2d extends Viewport implements Observer {
 		 */
 		public void paint(Graphics g) {
 			g.drawImage(_bg_img, 0, 0, this.getWidth(), this.getHeight(), this);
-			
+			//System.out.println("*****************"+this.getWidth());
 			Enumeration<BufferedImage> segs = _map_seg_name_to_img.elements();	
 			while (segs.hasMoreElements()) {
 				g.drawImage(segs.nextElement(), 0, 0,  this.getWidth(), this.getHeight(), this);
@@ -248,8 +248,6 @@ public class Viewport2d extends Viewport implements Observer {
 		// different image.
 		for(String seg_name : _map_name_to_seg.keySet()) {		
 			Segment seg = _slices.getSegment(seg_name);
-			System.out.println("showing segment "+seg.getName()+" color: "+Integer.toHexString(seg.getColor()));			
-			//seg.create_range_seg(_max_slider, _min_slider, _slices);
 			seg.create_range_seg(seg.getMaxSlider(), seg.getMinSlider(), _slices);
 			int active_id = _slices.getActiveImageID();
 			int[] pixel = dataProcess();
@@ -290,11 +288,8 @@ public class Viewport2d extends Viewport implements Observer {
 							buffer.setRGB(i,layer,pixel[layer*width+i]&(0xff000000+seg.getColor()));
 						else
 							buffer.setRGB(i,layer,0xff000000);
-					}
-					
+					}					
 				}
-				
-
 			}	break;
 			default: break;
 			}			
@@ -329,11 +324,7 @@ public class Viewport2d extends Viewport implements Observer {
 			_slice_names.clear();
 			//_map_name_to_seg.clear();
 			_map_seg_name_to_img.clear();
-//			Set<String> segs = _map_seg_name_to_img.keySet();	
-//			for(String str:segs) {
-//				_map_seg_name_to_img.remove(str);
-//			}
-			//_map_seg_name_to_img.clear();
+
 		}
 		
 		if (m._type == Message.M_NEW_IMAGE_LOADED) {
@@ -371,18 +362,16 @@ public class Viewport2d extends Viewport implements Observer {
 			}
 		}
 		
-		if (m._type == Message.M_SEG_SLIDER) {
-			Segment seg = (Segment)m._obj;
-			_seg_name = seg.getName();
-			boolean update_needed = _map_name_to_seg.containsKey(_seg_name);
-			if (update_needed) {
-				_map_name_to_seg.get(_seg_name).setMaxSlider(seg.getMaxSlider());
-				_map_name_to_seg.get(_seg_name).setMinSlider(seg.getMinSlider());
-//				_max_slider = seg.getMaxSlider();
-//				_min_slider = seg.getMinSlider();
-				update_view();
-			}
-		}
+//		if (m._type == Message.M_SEG_SLIDER) {
+//			Segment seg = (Segment)m._obj;
+//			_seg_name = seg.getName();
+//			boolean update_needed = _map_name_to_seg.containsKey(_seg_name);
+//			if (update_needed) {
+//				_map_name_to_seg.get(_seg_name).setMaxSlider(seg.getMaxSlider());
+//				_map_name_to_seg.get(_seg_name).setMinSlider(seg.getMinSlider());
+//				update_view();
+//			}
+//		}
 		if (m._type == Message.M_NEW_SETTING) {
 			int[] value = (int[])m._obj;
 			_window_width = value[0];
@@ -594,9 +583,10 @@ public class Viewport2d extends Viewport implements Observer {
 	 *  
 	 */
 	public void regionGrow() {
-		int x = (int)Math.rint(((double)_display_X)/DEF_WIDTH*_w);//get nearest Integer
-		int y = (int)Math.rint(((double)_display_Y)/DEF_HEIGHT*_h);
-		
+		int x = (int)Math.rint(((double)_display_X*_w)/super.getWidth());//get nearest Integer
+		int y = (int)Math.rint(((double)_display_Y*_h)/super.getHeight());
+//		int x = (int)Math.rint(((double)_display_X)/500*_w);//get nearest Integer
+//		int y = (int)Math.rint(((double)_display_Y)/500*_h);
 		int active_img_id = _slices.getActiveImageID();
 		int grauwert = 0;
 		switch (_viewmodel) {		

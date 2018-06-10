@@ -67,7 +67,6 @@ public class Viewport extends JPanel {
 		}
 
 		update_view();
-		
 		return _map_name_to_seg.containsKey(name);
 	}
 }
