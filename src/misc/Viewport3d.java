@@ -1,7 +1,7 @@
 package misc;
 
 import java.awt.*;
-import java.util.ArrayList;
+
 import java.util.Observable;
 import java.util.Observer;
 
@@ -53,6 +53,7 @@ public class Viewport3d extends Viewport implements Observer {
 			}
 			// _scene = new BranchGroup();
 			_scene = createContentBranch();
+			//System.out.println("I am done!!!");
 			_scene.setCapability(BranchGroup.ALLOW_DETACH);
 
 			_scene.compile();
@@ -63,6 +64,8 @@ public class Viewport3d extends Viewport implements Observer {
 
 	private Panel3d _panel3d;
 	private String _seg_name;
+	private int _scale;
+	private long _last_time;
 
 	/**
 	 * Constructor, with a reference to the global image stack as argument.
@@ -72,7 +75,8 @@ public class Viewport3d extends Viewport implements Observer {
 	 */
 	public Viewport3d() {
 		super();
-		
+		_last_time = 0;
+		_scale = 128;
 		this.setPreferredSize(new Dimension(DEF_WIDTH, DEF_HEIGHT));
 		this.setLayout(new BorderLayout());
 		GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
@@ -108,11 +112,20 @@ public class Viewport3d extends Viewport implements Observer {
 		if (m._type == Message.M_SEG_CHANGED) {
 			String seg_name = ((Segment)m._obj).getName();
 			boolean update_needed = _map_name_to_seg.containsKey(seg_name);
-			if (update_needed) {
-				_seg_name = seg_name;	
+			long current_time = System.currentTimeMillis();
+			if (update_needed) {//&&(current_time-_last_time>1000) 
+				_seg_name = seg_name;				
 				update_view();
 			}
+			_last_time = current_time;
 		}
+		if (m._type == Message.M_3D_SCALE) {
+			int value = ((Integer)m._obj);
+			_scale = value;
+			update_view();
+			System.out.println("scale3d: "+value);
+		}
+		
 	}
 
 	public Shape3D test() {
@@ -138,12 +151,31 @@ public class Viewport3d extends Viewport implements Observer {
 	public Shape3D createPointCloud(String seg_name) {
 		if(seg_name==null) {
 			//return test();
-			return new ColorCube(30);
+			System.out.println("createPointCloud:segname is null!");
+			return new ColorCube(50);			
 		}
-		Segment seg = _slices.getSegment(seg_name);
-		BitMask[] bitmask = seg.get_bitMaskArray();
-		ArrayList<Point3f> points = new ArrayList<Point3f>();
 		
+		Segment seg = _map_name_to_seg.get(seg_name);
+		System.out.println("createPointCloud!!!! "+seg.getName());
+
+		BitMask[] bitmask = seg.get_bitMaskArray();
+
+		
+		Point3f[] points = new Point3f[113*256*256];
+		int count = 0;
+		for(int layer=0;layer<seg.getMaskNum();layer++) {
+			for(int row=0;row<bitmask[0].get_h();row++) {
+				for(int column=0;column<bitmask[0].get_w();column++) {
+					if(bitmask[layer].get(column, row)==true) {
+						points[count++] = 
+								new Point3f(column-128,row-128,(layer-66)*2);
+					}
+				}
+			}
+		}
+
+		// 换坐标显示
+		/*		
 		for(int layer=0;layer<seg.getMaskNum();layer++) {
 			for(int row=0;row<bitmask[0].get_h();row++) {
 				for(int column=0;column<bitmask[0].get_w();column++) {
@@ -153,20 +185,21 @@ public class Viewport3d extends Viewport implements Observer {
 				}
 			}
 		}
+		 */		
 		
-		int length = points.size();
-		GeometryArray geometrypoints = 
-				new PointArray(length, PointArray.COORDINATES);
-		for(int i=0;i<length;i++)
-			geometrypoints.setCoordinate(i, points.remove(0));
-		
+		if(count==0)
+			return null;
+
+		GeometryArray geometrypoints = new PointArray(count, PointArray.COORDINATES);
+		//System.out.println("length: "+count);
+		geometrypoints.setCoordinates(0,points,0,count);
 		PointAttributes pa = new PointAttributes(); // 定义点的特征 pa.setPointSize(5.0f);
 		pa.setPointSize(1.0f);
 		pa.setPointAntialiasingEnable(true);
 
 		Appearance ap = new Appearance();
 		ColoringAttributes color_ca = 
-				new ColoringAttributes(0, 1, 0, ColoringAttributes.FASTEST);
+				new ColoringAttributes(1, 0, 0, ColoringAttributes.FASTEST);
 		ap.setColoringAttributes(color_ca);
 		ap.setPointAttributes(pa);
 		Shape3D points_shape = new Shape3D(geometrypoints, ap);
@@ -184,9 +217,9 @@ public class Viewport3d extends Viewport implements Observer {
 		for (int i = 0; i < 3; i++)
 			ma.setRow(i, matrix[i]);
 		Vector3d trans_vector = new Vector3d(-128 * (1.0f / 128), 128 * (1.0f / 128), -128 * (1.0f / 128));
-		scale.setTranslation(trans_vector);
+//		scale.setTranslation(trans_vector);
 		scale.setRotation(ma);
-		scale.setScale(1.0f / 128);
+		scale.setScale(1.0f / _scale);
 		TransformGroup tans = new TransformGroup(scale);
 		tans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		root.addChild(tans);
@@ -198,10 +231,25 @@ public class Viewport3d extends Viewport implements Observer {
 
 //		ColorCube colorCube = new ColorCube(30);
 //		tans.addChild(colorCube);
-
 		Shape3D shape = createPointCloud(_seg_name);
 		tans.addChild(shape);
 		return root;
+	}	
+	
+	public boolean toggleSeg(Segment seg) {
+		String name = seg.getName();		
+		if (_map_name_to_seg.get(name)!=null) {
+			_map_name_to_seg.remove(name);
+			_seg_name = null;
+			System.out.println("toggleSeg: remove");
+		} else {			
+				_map_name_to_seg.put(name, seg);
+				_seg_name = seg.getName();
+				System.out.println("toggleSeg: add "+_seg_name);											
+		}
+		boolean gotcha = _map_name_to_seg.containsKey(name);
+		update_view();
+		return gotcha;
 	}
 
 }

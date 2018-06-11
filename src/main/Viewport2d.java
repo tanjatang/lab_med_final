@@ -247,8 +247,8 @@ public class Viewport2d extends Viewport implements Observer {
 		// rendering the segmentations. each segmentation is rendered in a
 		// different image.
 		for(String seg_name : _map_name_to_seg.keySet()) {		
-			Segment seg = _slices.getSegment(seg_name);
-			seg.create_range_seg(seg.getMaxSlider(), seg.getMinSlider(), _slices);
+			Segment seg = _map_name_to_seg.get(seg_name);
+			//seg.create_range_seg(seg.getMaxSlider(), seg.getMinSlider(), _slices);
 			int active_id = _slices.getActiveImageID();
 			int[] pixel = dataProcess();
 			BufferedImage buffer= new BufferedImage(_w, _h, BufferedImage.TYPE_INT_ARGB);

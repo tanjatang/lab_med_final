@@ -19,6 +19,7 @@ public class MenuBar extends JMenuBar {
 	private JMenu _menu2d;
 	private JMenu _menu3d;
 	private JMenu _menuTools;
+	private JMenu _menuTools3D;
 	private JMenuItem _no_entries2d;
 	private JMenuItem _no_entries3d;
 	private InfoWindow _info_frame;
@@ -48,6 +49,7 @@ public class MenuBar extends JMenuBar {
 		_menu2d = new JMenu("2D View");
 		_menu3d = new JMenu("3D View");
 		_menuTools = new JMenu("Tools");
+		_menuTools3D = new JMenu("3D Tools");
 		_info_frame = null;		
 
 		// -------------------------------------------------------------------------------------
@@ -143,6 +145,11 @@ public class MenuBar extends JMenuBar {
 		item = new JMenuItem(new String("Setting"));
 		item.addActionListener(setWindowWidthCenterListener);
 		_menuTools.add(item);
+		
+		// addition in exercise 5.2
+		item = new JMenuItem(new String("setting"));
+		item.addActionListener(setScaleFor3DListener);
+		_menuTools3D.add(item);
 
 		// -------------------------------------------------------------------------------------
 
@@ -150,6 +157,7 @@ public class MenuBar extends JMenuBar {
 		add(_menu2d);
 		add(_menu3d);
 		add(_menuTools);
+		add(_menuTools3D);
 	}
 
 	/**
@@ -275,7 +283,11 @@ public class MenuBar extends JMenuBar {
 	ActionListener setWindowWidthCenterListener = new ActionListener() {
 		public void actionPerformed(ActionEvent event) {	
 			//_tools.showTool(new ToolWindowSelector());
-			new ToolWindowSelector();
+			JFrame frame = new JFrame("setting");
+			frame.setSize(800, 300);
+	        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	        
+	        frame.add(new ToolWindowSelector());
+			frame.setVisible(true);
 		}
 	};
 	ActionListener selectRegionGrowListener = new ActionListener() {
@@ -283,6 +295,17 @@ public class MenuBar extends JMenuBar {
 			_v2d.selectRegionGrowOrNot();
 		}
 	};	
+	//addition in exercise 5.2
+	ActionListener setScaleFor3DListener = new ActionListener() {
+		public void actionPerformed(ActionEvent event) {	
+//			JFrame frame = new JFrame("3D scale");
+//			frame.setSize(800, 200);
+//	        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	        
+//	        frame.add(new ToolWindowSelector());
+//			frame.setVisible(true);
+	    
+		}
+	};
 
 	/**
 	 * ActionListener for toggling the 2d background image.
@@ -297,7 +320,7 @@ public class MenuBar extends JMenuBar {
 	 * ActionListener for toggling the 3d background image.
 	 */
 	ActionListener toggleBGListener3d = new ActionListener() {
-		public void actionPerformed(ActionEvent event) {
+		public void actionPerformed(ActionEvent event) {			
 			_v3d.toggleBG();
 		}
 	};

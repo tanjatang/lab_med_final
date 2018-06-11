@@ -46,7 +46,6 @@ public class Viewport extends JPanel {
 	public boolean toggleBG() {
 		_show_bg = !_show_bg;
 		update_view();
-		
 		return _show_bg;		
 	}
 

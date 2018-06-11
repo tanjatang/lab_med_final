@@ -21,7 +21,7 @@ public class ImageStack extends Observable {
 	private static ImageStack _instance = null;
 	private Vector<DiFile> _dicom_files;
 	private DefaultListModel<String> _seg_names;
-	private Hashtable<String, Segment> _segment;
+	public Hashtable<String, Segment> _segment;
 	private String _dir_name;
 	private int _w, _h, _active;
 	public Segment _seg_RegionGrow;
@@ -355,6 +355,10 @@ public class ImageStack extends Observable {
 	void widthCenterChanged(int[] value) {
 		setChanged();
 	    notifyObservers(new Message(Message.M_NEW_SETTING, value));
+	}
+	void scale3DChanged(int value) {
+		setChanged();
+	    notifyObservers(new Message(Message.M_3D_SCALE, value));
 	}
 	//////////
 	/**
