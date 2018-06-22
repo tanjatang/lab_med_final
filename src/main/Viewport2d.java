@@ -33,7 +33,7 @@ public class Viewport2d extends Viewport implements Observer {
 	// its data source (DefaultListModel)
 	private ImageSelector _img_sel;
 	private DefaultListModel<String> _slice_names;
-	
+
 	// width and heigth of our images. dont mix those with
 	// Viewport2D width / height or Panel2d width / height!
 	private int _w, _h;
@@ -47,13 +47,19 @@ public class Viewport2d extends Viewport implements Observer {
 	private final int FRONTAL = 2;
 	//private final int NO_if_display_segment = 3;
 	
-	private int _min_slider,_max_slider;
 	private String _seg_name;
 
 	private int _window_width;
 	private int _window_center;
 	
 	private boolean _if_display_RGseg;
+	
+	public DefaultListModel<String> get_slice_names(){
+		return _slice_names;
+	}
+	public int get_viewmodel() {
+		return _viewmodel;
+	}
 	/**
 	 * Private class, implementing the GUI element for displaying the 2d data.
 	 * Implements the MouseListener Interface.
@@ -163,8 +169,8 @@ public class Viewport2d extends Viewport implements Observer {
         add(_img_sel, BorderLayout.EAST );
 		setPreferredSize(new Dimension(DEF_WIDTH+50,DEF_HEIGHT)); //设置首选尺寸
 		
-		_min_slider = 50; //exercise 3
-		_max_slider = 50;
+//		_min_slider = 50; //exercise 3
+//		_max_slider = 50;
 		_display_X = 0;
 		_display_Y = 0;
 		_if_display_RGseg = false;
@@ -773,5 +779,9 @@ public class Viewport2d extends Viewport implements Observer {
 		//System.out.println("x: "+current.cx+" y: "+current.cy+" z: "+current.cz );
 		}while(!will_be_researched.isEmpty());
 		
+	}
+	
+	public BufferedImage getBGImage(int model,int pos){		
+		return _bg_img;
 	}
 }

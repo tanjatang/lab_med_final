@@ -41,7 +41,7 @@ public class DiDataElement {
 		int id = is.getShort();
 		int eid = is.getShort();
 		setGroupID(id);
-		set_boardID(eid);
+		setElementID(eid);
 		int tag = (id << 16) + eid;
 		int vr = DiDi.getVR(tag);
 		int b0 = is.getByte();
@@ -144,7 +144,7 @@ public class DiDataElement {
 	 * @param element_number
 	 *            the element number.
 	 */
-	public void set_boardID(int element_number) {
+	public void setElementID(int element_number) {
 		this.boardid = element_number;
 	}
 

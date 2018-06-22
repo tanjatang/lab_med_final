@@ -53,7 +53,7 @@ public class ToolWindowSelector extends JPanel{
 				if (source.getValueIsAdjusting()) {
 					_scale3d = (int)source.getValue();					
 					int value = _scale3d;
-					slices.scale3DChanged(value);
+					//slices.setting3DChanged(value);
 				}
 			}
 		});

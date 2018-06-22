@@ -147,8 +147,8 @@ public class MenuBar extends JMenuBar {
 		_menuTools.add(item);
 		
 		// addition in exercise 5.2
-		item = new JMenuItem(new String("setting"));
-		item.addActionListener(setScaleFor3DListener);
+		item = new JMenuItem(new String("setting 3D"));
+		item.addActionListener(settingFor3DListener);
 		_menuTools3D.add(item);
 
 		// -------------------------------------------------------------------------------------
@@ -296,13 +296,13 @@ public class MenuBar extends JMenuBar {
 		}
 	};	
 	//addition in exercise 5.2
-	ActionListener setScaleFor3DListener = new ActionListener() {
+	ActionListener settingFor3DListener = new ActionListener() {
 		public void actionPerformed(ActionEvent event) {	
-//			JFrame frame = new JFrame("3D scale");
-//			frame.setSize(800, 200);
-//	        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	        
-//	        frame.add(new ToolWindowSelector());
-//			frame.setVisible(true);
+			JFrame frame = new JFrame("3D Setting");
+			frame.setSize(800, 300);
+	        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	        
+	        frame.add(new Tools3D());
+			frame.setVisible(true);
 	    
 		}
 	};

@@ -356,7 +356,7 @@ public class ImageStack extends Observable {
 		setChanged();
 	    notifyObservers(new Message(Message.M_NEW_SETTING, value));
 	}
-	void scale3DChanged(int value) {
+	void setting3DChanged(int[] value) {
 		setChanged();
 	    notifyObservers(new Message(Message.M_3D_SCALE, value));
 	}
