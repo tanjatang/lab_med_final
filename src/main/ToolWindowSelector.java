@@ -24,7 +24,7 @@ public class ToolWindowSelector extends JPanel{
 		_range_sel_title3d = new JLabel("setting scale (for 3d):   max  ->  min");
 		int range_max = 4095;
 		_width = 4095;
-		_center = 2047;
+		_center = 1000;
 		_scale3d = 128;
 		
 		_width_label = new JLabel("Width:");

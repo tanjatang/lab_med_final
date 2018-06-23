@@ -175,7 +175,7 @@ public class Viewport2d extends Viewport implements Observer {
 		_display_Y = 0;
 		_if_display_RGseg = false;
 		_window_width = 4096;
-		_window_center = _window_width/2;		
+		_window_center = 1000;		
 		_seg_name = new String();
 	}
 
@@ -299,6 +299,7 @@ public class Viewport2d extends Viewport implements Observer {
 			}	break;
 			default: break;
 			}			
+			_bg_img = buffer;
 			_map_seg_name_to_img.put(seg_name, buffer);
 		}
 		
@@ -509,7 +510,6 @@ public class Viewport2d extends Viewport implements Observer {
 		}else {
 			for (int i=0; i<pixel.length; i++) {
 				_bg_img.setRGB(i%_w,i/_w,pixel[i]);
-				//_bg_img.setRGB(i/_w,i%_w,pixel[i]);
 			}
 		}
 		
@@ -550,7 +550,7 @@ public class Viewport2d extends Viewport implements Observer {
 			final int[] bg_pixels = ((DataBufferInt) _bg_img.getRaster().getDataBuffer()).getData();
 			for (int i=0; i<bg_pixels.length; i++) {
 				bg_pixels[i] = pixel[i];
-				//bg_pixels[i] = 0xff000000;
+				//bg_pixels[i] = 0xAA000000;
 			}
 		}	
 	}

@@ -6,6 +6,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
+import com.sun.j3d.utils.geometry.ColorCube;
 import com.sun.j3d.utils.universe.*;
 
 import main.LabMed;
@@ -70,6 +71,7 @@ public class Viewport3d extends Viewport implements Observer {
 	private String _seg_name;
 	private int _scale;
 	Matrix3f _matrix;
+	private boolean _if_display_3D;
 	private int _xaxis,_yaxis,_zaxis;
 	private long _last_time;
 
@@ -88,12 +90,13 @@ public class Viewport3d extends Viewport implements Observer {
 		float[][] ma = { { 1f, 0f, 0f }, 
 				 { 0f, 0f, -1f }, 
 				 { 0f, 1f, 0f }, };
-		//Matrix3f matrix = new Matrix3f();
+		
 		for (int i = 0; i < 3; i++)
 			_matrix.setRow(i, ma[i]);
 		_xaxis = 0;
 		_yaxis = 0;
 		_zaxis = 0;
+		_if_display_3D = false;
 		this.setPreferredSize(new Dimension(DEF_WIDTH, DEF_HEIGHT));
 		this.setLayout(new BorderLayout());
 		GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
@@ -145,10 +148,11 @@ public class Viewport3d extends Viewport implements Observer {
 			update_view();
 		}
 		
-		if (m._type == Message.M_NEW_ACTIVE_IMAGE) {
+		if (m._type == Message.M_NEW_ACTIVE_IMAGE||
+				m._type == Message.M_NEW_SETTING||
+				m._type == Message.M_SEG_CHANGED) {
 			update_view();			
 		}
-		
 	}
 
 	public Shape3D test() {
@@ -230,19 +234,17 @@ public class Viewport3d extends Viewport implements Observer {
 		return points_shape;
 	}
 	
-
 	public BranchGroup createContentBranch() {
 		BranchGroup root = new BranchGroup();
 		root.setCapability(BranchGroup.ALLOW_DETACH);
 
 		Transform3D scale = new Transform3D();
 
-		Vector3d trans_vector = new Vector3d(-128 * (1.0f / 128), 128 * (1.0f / 128), -128 * (1.0f / 128));
+//		Vector3d trans_vector = new Vector3d(-128 * (1.0f / 128), 128 * (1.0f / 128), -128 * (1.0f / 128));
 //		scale.setTranslation(trans_vector);
 		
+		_matrix = calculateFinalRotationMatrix(_xaxis/100f,_yaxis/100f,_zaxis/100f);
 		scale.setRotation(_matrix);
-		
-		scale.getRotationScale(_matrix);
 		scale.setScale(1.0f / _scale);
 		TransformGroup tans = new TransformGroup(scale);
 		tans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -254,13 +256,25 @@ public class Viewport3d extends Viewport implements Observer {
 		tans.addChild(rotate);
 
 		Shape3D shape = createPointCloud(_seg_name);
-		if(shape==null) {			
-			tans.addChild(orthoSlices());
-		}else {
-			tans.addChild(shape);
-		}
-		tans.addChild(cubeShape());
-		tans.addChild(textTest());
+		ColorCube colorCube = new ColorCube(80);
+		Shape3D orthoslices = orthoSlices();
+		if (!_if_display_3D) {
+			tans.addChild(colorCube);
+		} else {
+			tans.removeChild(colorCube);
+			if (shape == null) {
+				if (_view2d.get_slice_names().size() < 2) {
+				} else {					
+					tans.addChild(orthoslices);
+				}
+			} else {
+				tans.removeChild(orthoslices);
+				tans.addChild(shape);
+			}
+			tans.addChild(cubeShape());
+			tans.addChild(textTest());
+		}			
+		
 			
 		return root;
 	}	
@@ -339,6 +353,8 @@ public class Viewport3d extends Viewport implements Observer {
 			pa.setCullFace(PolygonAttributes.CULL_NONE);
 			
 			ap_plane.setPolygonAttributes(pa);
+//			ColoringAttributes color_ca = new ColoringAttributes(0, 1, 0, ColoringAttributes.FASTEST);
+//			ap_plane.setColoringAttributes(color_ca);
 			ap_plane.setTexture(tex);
 			
 			Shape3D shape = new Shape3D(sq,ap_plane);
@@ -455,12 +471,55 @@ public class Viewport3d extends Viewport implements Observer {
 		Shape3D shape3d = new Shape3D(text3Dx, ap);
 		shape3d.addGeometry(text3Dy);
 		return shape3d;
+	}	
+
+	/**
+	 * this function is suitable for 3x3 matrix
+	 * @param ma1
+	 * @param ma2
+	 * @return float[][]
+	 */
+	private float[][] matrixMulti(float[][] ma1,float[][] ma2){
+		float[][] result = new float[3][3];
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				float temp = 0.0f;
+				for (int x = 0; x < 3; x++) {
+					temp += ma1[i][x] * ma2[x][j];
+				}
+				result[i][j] = temp;
+			}
+		}
+		return result;
 	}
 
-	
-	
-	
-	public boolean toggleSeg(Segment seg) {
+	private Matrix3f calculateFinalRotationMatrix(float xaxis,float yaxis,float zaxis){
+		float[][] ma = { { 1f, 0f, 0f }, 
+						 { 0f, 0f, -1f }, 
+						 { 0f, 1f, 0f }, };
+		float[][] Rx = { { 1f, 0f, 0f }, 
+						 { 0f, (float) Math.cos(xaxis), (float) Math.sin(xaxis) },
+						 { 0f, -((float)Math.sin(xaxis)), (float) Math.cos(xaxis) } };
+		
+		float[][] Ry = { { (float) Math.cos(yaxis), 0f, -((float) Math.sin(yaxis)) }, 
+						 { 0f, 1f, 0f },
+						 { (float) Math.sin(yaxis), 0f, (float) Math.cos(yaxis) } };
+		
+		float[][] Rz = { { (float) Math.cos(zaxis), (float) Math.sin(zaxis), 0f },
+						 { -((float)Math.sin(zaxis)), (float) Math.cos(zaxis), 0f }, 
+						 { 0f, 0f, 1f } };
+		float[][] temp = new float[3][3];
+		
+		temp = matrixMulti(ma,Rx);
+		temp = matrixMulti(temp,Ry);
+		temp = matrixMulti(temp,Rz);
+
+		Matrix3f matrix3f = new Matrix3f();
+		for (int i = 0; i < 3; i++)
+			matrix3f.setRow(i, temp[i]);
+		return matrix3f;
+	}
+ 	public boolean toggleSeg(Segment seg) {
 		String name = seg.getName();		
 		if (_map_name_to_seg.get(name)!=null) {
 			_map_name_to_seg.remove(name);
@@ -474,6 +533,11 @@ public class Viewport3d extends Viewport implements Observer {
 		boolean gotcha = _map_name_to_seg.containsKey(name);
 		update_view();
 		return gotcha;
+	}
+	
+	public void selectDisplay3D() {
+		_if_display_3D = !_if_display_3D;
+		update_view();
 	}
 
 }

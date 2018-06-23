@@ -150,6 +150,11 @@ public class MenuBar extends JMenuBar {
 		item = new JMenuItem(new String("setting 3D"));
 		item.addActionListener(settingFor3DListener);
 		_menuTools3D.add(item);
+		// addition in exercise 6
+		JRadioButtonMenuItem rbdisplay;
+		rbdisplay = new JRadioButtonMenuItem("3d display");
+		rbdisplay.addActionListener(selectDisplay3DListener);
+		_menuTools3D.add(rbdisplay);
 
 		// -------------------------------------------------------------------------------------
 
@@ -298,12 +303,17 @@ public class MenuBar extends JMenuBar {
 	//addition in exercise 5.2
 	ActionListener settingFor3DListener = new ActionListener() {
 		public void actionPerformed(ActionEvent event) {	
-			JFrame frame = new JFrame("3D Setting");
+			JFrame frame = new JFrame("Setting");
 			frame.setSize(800, 300);
 	        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	        
 	        frame.add(new Tools3D());
-			frame.setVisible(true);
-	    
+			frame.setVisible(true);	    
+		}
+	};
+	//addition in exercise 6.2
+	ActionListener selectDisplay3DListener = new ActionListener() {
+		public void actionPerformed(ActionEvent event) {	
+			_v3d.selectDisplay3D();
 		}
 	};
 
@@ -332,6 +342,7 @@ public class MenuBar extends JMenuBar {
 		public void actionPerformed(ActionEvent event) {
 			String name = event.getActionCommand();
 			_v2d.toggleSeg(LabMed.get_is().getSegment(name));
+			_v3d.update_view();
 		}
 	};
 
@@ -369,6 +380,7 @@ public class MenuBar extends JMenuBar {
 					_no_entries3d.setVisible(false);					
 					Segment seg = is.addSegment(name);
 					_v2d.toggleSeg(seg);
+					_v3d.update_view();
 					JMenuItem item = new JCheckBoxMenuItem(name, true);
 					item.addActionListener(toggleSegListener2d);
 					_menu2d.add(item);

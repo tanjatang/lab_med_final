@@ -15,14 +15,15 @@ import javax.swing.event.ChangeListener;
 public class Tools3D extends JPanel{
 	private int _xaxis, _yaxis, _zaxis, _scale3d;
 	private JSlider _xaxis_slider, _yaxis_slider,_zaxis_slider,_scale_slider;
-	private JLabel _range_sel_title, _xaxis_label, _yaxis_label,_zaxis_label, _scale3d_label;
+	private JLabel _range_sel_title,_range_sel_scale, _xaxis_label, _yaxis_label,_zaxis_label, _scale3d_label;
 //	private JFrame _frame;
 	public Tools3D() {
 		final ImageStack slices = ImageStack.getInstance();	
 		       
-		_range_sel_title = new JLabel("setting rotation :   min  ->  max");
+		_range_sel_title = new JLabel("setting rotation :   -π  ---->  π");
+		_range_sel_scale = new JLabel("setting scale :   max  ---->  min");
 //		_range_sel_title3d = new JLabel("setting scale (for 3d):   max  ->  min");
-		int range_max = (int)(2*100*Math.PI);
+		int range_max = (int)(100*Math.PI);
 		_xaxis = 0;
 		_yaxis = 0;
 		_zaxis = 0;
@@ -33,7 +34,7 @@ public class Tools3D extends JPanel{
 		_zaxis_label = new JLabel("Z:");
 		_scale3d_label = new JLabel("Scale:");
 		
-		_xaxis_slider = new JSlider(0, range_max, _xaxis);
+		_xaxis_slider = new JSlider(-(range_max), range_max, _xaxis);
 		_xaxis_slider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JSlider source = (JSlider) e.getSource();
@@ -45,12 +46,12 @@ public class Tools3D extends JPanel{
 					value[2] = _zaxis;
 					value[3] = _scale3d;
 					slices.setting3DChanged(value);
-					System.out.println("_xaxis_slider stateChanged: "+_xaxis);
+					//System.out.println("_xaxis_slider stateChanged: "+_xaxis);
 				}
 			}
 		});
 		
-		_yaxis_slider = new JSlider(0, range_max, _yaxis);
+		_yaxis_slider = new JSlider(-(range_max), range_max, _yaxis);
 		_yaxis_slider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JSlider source = (JSlider) e.getSource();
@@ -62,11 +63,11 @@ public class Tools3D extends JPanel{
 					value[2] = _zaxis;
 					value[3] = _scale3d;
 					slices.setting3DChanged(value);
-					System.out.println("_yaxis_slider stateChanged: "+_yaxis);
+					//System.out.println("_yaxis_slider stateChanged: "+_yaxis);
 				}
 			}
 		});				
-		_zaxis_slider = new JSlider(0, range_max, _zaxis);
+		_zaxis_slider = new JSlider(-(range_max), range_max, _zaxis);
 		_zaxis_slider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JSlider source = (JSlider) e.getSource();
@@ -78,7 +79,7 @@ public class Tools3D extends JPanel{
 					value[2] = _zaxis;
 					value[3] = _scale3d;
 					slices.setting3DChanged(value);
-					System.out.println("_yaxis_slider stateChanged: "+_zaxis);
+					//System.out.println("_yaxis_slider stateChanged: "+_zaxis);
 				}
 			}
 		});				
@@ -95,7 +96,7 @@ public class Tools3D extends JPanel{
 					value[2] = _zaxis;
 					value[3] = _scale3d;
 					slices.setting3DChanged(value);
-					System.out.println("_scale_slider stateChanged: "+_scale3d);
+					//System.out.println("_scale_slider stateChanged: "+_scale3d);
 
 				}
 			}
@@ -106,15 +107,17 @@ public class Tools3D extends JPanel{
 		
 		this.setLayout(null);
 		_range_sel_title.setBounds(20,20,600,50);
+		_range_sel_scale.setBounds(20,180,600,50);
 		_xaxis_label.setBounds(20,60,80,50);
 		_yaxis_label.setBounds(20,100,80,50);
 		_zaxis_label.setBounds(20,140,80,50);
-		_scale3d_label.setBounds(20,180,80,50);
+		_scale3d_label.setBounds(20,220,80,50);
 		_xaxis_slider.setBounds(90, 60, 600, 50);
 		_yaxis_slider.setBounds(90, 100, 600, 50);	
 		_zaxis_slider.setBounds(90, 140, 600, 50);	
-		_scale_slider.setBounds(90, 180, 600, 50);
+		_scale_slider.setBounds(90, 220, 600, 50);
 		this.add(_range_sel_title);
+		this.add(_range_sel_scale);
 		this.add(_xaxis_label);
 		this.add(_yaxis_label);
 		this.add(_zaxis_label);
