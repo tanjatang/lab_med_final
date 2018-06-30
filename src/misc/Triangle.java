@@ -1,3 +1,8 @@
+/**
+ * Triangle class for exercise 7
+ * @author xiao; tang
+ */
+
 package misc;
 import misc.Triangle;
 
@@ -6,11 +11,11 @@ public class Triangle {
 	private double[] _e1;
 	private double[] _e2;
 	final double[][] ROT_matrix_left = {{0f,0f,-1f},
-	   		{0f,1f,0f},
-	   		{1f,0f,0f}};
+	   									{0f,1f,0f},
+	   									{1f,0f,0f}};
 	final double[][] ROT_matrix_up = {{1f,0f,0f},
-			  {0f,0f,1f},
-			  {0f,-1f,0f}};
+									  {0f,0f,1f},
+									  {0f,-1f,0f}};
 
 	public Triangle(double[] e0,double[] e1,double[] e2) {
 		// TODO Auto-generated constructor stub

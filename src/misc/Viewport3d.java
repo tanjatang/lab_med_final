@@ -16,8 +16,10 @@ import main.Viewport2d;
 import main.Segment;
 
 import javax.media.j3d.*;
+import javax.vecmath.Color3b;
 import javax.vecmath.Color3f;
 import javax.vecmath.Color4b;
+import javax.vecmath.Color4f;
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
@@ -74,6 +76,8 @@ public class Viewport3d extends Viewport implements Observer {
 	Matrix3f _matrix;
 	private boolean _if_display_3D;
 	private int _xaxis,_yaxis,_zaxis;
+	public MarchingCube _marchingCube;
+
 
 	/**
 	 * Constructor, with a reference to the global image stack as argument.
@@ -96,6 +100,9 @@ public class Viewport3d extends Viewport implements Observer {
 		_yaxis = 0;
 		_zaxis = 0;
 		_if_display_3D = false;
+		_marchingCube = new MarchingCube();
+//		_marchingCube.get_Cube_From_Lib(0xfe);
+		
 		this.setPreferredSize(new Dimension(DEF_WIDTH, DEF_HEIGHT));
 		this.setLayout(new BorderLayout());
 		GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
@@ -154,7 +161,6 @@ public class Viewport3d extends Viewport implements Observer {
 
 	public Shape3D createPointCloud(String seg_name) {
 		if(seg_name==null) {
-//			System.out.println("createPointCloud:segname is null!");
 			return null;
 		}
 		
@@ -175,20 +181,7 @@ public class Viewport3d extends Viewport implements Observer {
 					}
 				}
 			}
-		}
-
-		// 换坐标显示
-		/*		
-		for(int layer=0;layer<seg.getMaskNum();layer++) {
-			for(int row=0;row<bitmask[0].get_h();row++) {
-				for(int column=0;column<bitmask[0].get_w();column++) {
-					if(bitmask[layer].get(column, row)==true) {
-						points.add(new Point3f(column,row,layer*2));
-					}
-				}
-			}
-		}
-		 */		
+		}	
 		
 		if(count==0)
 			return null;
@@ -266,7 +259,6 @@ public class Viewport3d extends Viewport implements Observer {
 			Point3d p1 = new Point3d();
 			Point3d p2 = new Point3d();
 			Point3d p3 = new Point3d();
-			Color4b color = new Color4b();
 			QuadArray sq = new QuadArray(12, QuadArray.COORDINATES|GeometryArray.TEXTURE_COORDINATE_2
 					);//| GeometryArray.COLOR_4
 			
@@ -301,15 +293,10 @@ public class Viewport3d extends Viewport implements Observer {
 			default:
 				break;
 			}
-			color.set(bs);
 			sq.setCoordinate(0, p0);
 			sq.setCoordinate(1, p1);
 			sq.setCoordinate(2, p2);
 			sq.setCoordinate(3, p3);
-//			sq.setColor(0, color);
-//			sq.setColor(1, color);
-//			sq.setColor(2, color);
-//			sq.setColor(3, color);
 			sq.setTextureCoordinate(0, 0,new TexCoord2f(0.0f,0.0f));
 			sq.setTextureCoordinate(0, 1,new TexCoord2f(1.0f,0.0f));
 			sq.setTextureCoordinate(0, 2,new TexCoord2f(1.0f,1.0f));
@@ -323,15 +310,24 @@ public class Viewport3d extends Viewport implements Observer {
 			tex.setImage(0, i2d);
 			
 			Appearance ap_plane = new Appearance();
+			
+			ColoringAttributes color_ca = new ColoringAttributes(1, 1, 0, ColoringAttributes.FASTEST);
+			color_ca.setColor(new Color3f(160f/255,32f/255,240f/255)); //   
+			ap_plane.setColoringAttributes(color_ca);
+			TransparencyAttributes trana = new TransparencyAttributes(TransparencyAttributes.FASTEST,0.3f);
+			ap_plane.setTransparencyAttributes(trana);
+			
 			PolygonAttributes pa = new PolygonAttributes();
 			
+			TextureAttributes texa = new TextureAttributes();
+			
+			texa.setTextureMode(TextureAttributes.COMBINE_ADD); //REPLACE 
+			texa.setTextureBlendColor(new Color4f(1.0f,1.0f,1.0f,0.0f));
+			ap_plane.setTextureAttributes(texa);
 			pa.setPolygonMode(PolygonAttributes.POLYGON_FILL);
 //			pa.setCullFace(PolygonAttributes.CULL_NONE);
 			
 			ap_plane.setPolygonAttributes(pa);
-			ColoringAttributes color_ca = new ColoringAttributes(0, 1, 0, ColoringAttributes.FASTEST);
-			color_ca.setColor(new Color3f(0.0f, 1.0f, 0.0f));
-			ap_plane.setColoringAttributes(color_ca);
 			ap_plane.setTexture(tex);
 			
 			Shape3D shape = new Shape3D(sq,ap_plane);
@@ -431,7 +427,9 @@ public class Viewport3d extends Viewport implements Observer {
 		ColoringAttributes color_ca = new ColoringAttributes(1, 1, 1, ColoringAttributes.FASTEST);
 		ap.setColoringAttributes(color_ca);
 		ap.setLineAttributes(linea);
-		
+		TransparencyAttributes trana = new TransparencyAttributes(TransparencyAttributes.FASTEST,0.6f);
+		ap.setTransparencyAttributes(trana);
+
 		Shape3D line = new Shape3D(la,ap);
 		return line;
 	}
@@ -447,8 +445,10 @@ public class Viewport3d extends Viewport implements Observer {
 		Text3D text3Dy = new Text3D(font3D, "Y", p2);
 		Text3D text3Dz = new Text3D(font3D, "Z", p3);
 		Appearance ap = new Appearance();
-		ColoringAttributes color_ca = new ColoringAttributes(0, 0, 1, ColoringAttributes.FASTEST);
+		ColoringAttributes color_ca = new ColoringAttributes(1, 1, 1, ColoringAttributes.FASTEST);
 		ap.setColoringAttributes(color_ca);
+		TransparencyAttributes trana = new TransparencyAttributes(TransparencyAttributes.FASTEST,0.8f);
+		ap.setTransparencyAttributes(trana);
 		Shape3D shape3d = new Shape3D(text3Dx, ap);
 		shape3d.addGeometry(text3Dy);
 		shape3d.addGeometry(text3Dz);

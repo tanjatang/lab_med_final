@@ -1,15 +1,30 @@
+/**
+ * MarchingCube class for exercise 7
+ * @author xiao; tang
+ */
+
 package misc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
-
+/*
+ * medium point of edge (vertex1,vertex2)
+ * e0(0,1)
+ * e1(1,2)
+ * e2(2,3)
+ * e3(3,0)
+ * e4(4,5)
+ * e5(5,6)
+ * e6(6,7)
+ * e7(7,4)
+ * e8(0,4)
+ * e9(1,5)
+ * e10(2,6)
+ * e11(3,7)
+ */
 public class MarchingCube {
-	private HashMap<Integer,CubeCase> _table;
-	public CubeCase get_Cube_From_Lib(int index) {
-		return _table.get(index);
-	}
 	final float SCALE = 128.0f;
 	final double[] e0_x = {0f,-1*SCALE,1*SCALE};
 	final double[] e1_x = {1*SCALE,0f,1*SCALE};
@@ -24,12 +39,17 @@ public class MarchingCube {
 	final double[] e10_x = {1*SCALE,1*SCALE,0f};
 	final double[] e11_x = {-1*SCALE,1*SCALE,0f};
 	
+	private HashMap<Integer,CubeCase> _table;
+				
 	public MarchingCube() {
 		_table = new HashMap<Integer,CubeCase>();
 		createTable();
 	}
+	public CubeCase get_Cube_From_Lib(int index) {
+		return _table.get(index);
+	}
 	
-	public void createTable() {
+	private void createTable() {
 		Queue<CubeCase> basic_cube = new LinkedList<CubeCase>();
 		 for(int i=1;i<=14;i++) {
 			 CubeCase current = selectBasisCase(i);
@@ -50,7 +70,7 @@ public class MarchingCube {
 			 }			 
 		 }		 
 	}
-	public CubeCase selectBasisCase(int index) {
+	private CubeCase selectBasisCase(int index) {
 		CubeCase current = new CubeCase(0, null);
 		switch (index) {
 		case 1:
@@ -100,8 +120,7 @@ public class MarchingCube {
 		}
 		return current;
 	}
-	
-	public CubeCase mirrorBasisCase(CubeCase org) {
+	private CubeCase mirrorBasisCase(CubeCase org) {
 		byte index = (byte) (0xff^org.get_vertex());
 		ArrayList<Triangle> list_triangle = new ArrayList<Triangle>();
 		for(Triangle tri: org.get_Triangle()) {			
@@ -114,8 +133,7 @@ public class MarchingCube {
 		return current;
 	}
 	
-	
-	public CubeCase createBasicCase1() {
+	private CubeCase createBasicCase1() {
 		byte b = (byte)0x01;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 		Triangle t1 = new Triangle(e0_x, e8_x, e3_x);
@@ -123,7 +141,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase2() {
+	private CubeCase createBasicCase2() {
 		byte b = (byte)0x03;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 		Triangle t1 = new Triangle(e3_x, e9_x, e8_x);
@@ -133,8 +151,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	
-	public CubeCase createBasicCase3() {
+	private CubeCase createBasicCase3() {
 		byte b = (byte)0x05;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -145,7 +162,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase4() {
+	private CubeCase createBasicCase4() {
 		byte b = (byte)0x32;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 		Triangle t1 = new Triangle(e0_x, e1_x, e8_x);
@@ -157,7 +174,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase5() {
+	private CubeCase createBasicCase5() {
 		byte b = (byte)0x33;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -168,8 +185,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	
-	public CubeCase createBasicCase6() {
+	private CubeCase createBasicCase6() {
 		byte b = (byte)0x3A;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -184,7 +200,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase7() {
+	private CubeCase createBasicCase7() {
 		byte b = (byte)0xA5;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -199,7 +215,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase8() {
+	private CubeCase createBasicCase8() {
 		byte b = (byte)0xB1;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -214,7 +230,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}	
-	public CubeCase createBasicCase9() {
+	private CubeCase createBasicCase9() {
 		byte b = (byte)0xB2;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -229,7 +245,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase10() {
+	private CubeCase createBasicCase10() {
 		byte b = (byte)0x41;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -241,7 +257,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase11() {
+	private CubeCase createBasicCase11() {
 		byte b = (byte)0x43;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -254,7 +270,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase12() {
+	private CubeCase createBasicCase12() {
 		byte b = (byte)0x4A;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -267,7 +283,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase13() {
+	private CubeCase createBasicCase13() {
 		byte b = (byte)0x69;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -282,7 +298,7 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
-	public CubeCase createBasicCase14() {
+	private CubeCase createBasicCase14() {
 		byte b = (byte)0x71;
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 
@@ -297,4 +313,5 @@ public class MarchingCube {
 		CubeCase basis = new CubeCase(b,tri);		
 		return basis;
 	}
+
 }

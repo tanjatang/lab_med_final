@@ -1,38 +1,20 @@
 /**
- * 
+ * CubeCase class for exercise 7
  * @author xiao; tang
- *
  */
+
 package misc;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/*
- * medium point of edge (vertex1,vertex2)
- * e0(0,1)
- * e1(1,2)
- * e2(2,3)
- * e3(3,0)
- * e4(4,5)
- * e5(5,6)
- * e6(6,7)
- * e7(7,4)
- * e8(0,4)
- * e9(1,5)
- * e10(2,6)
- * e11(3,7)
- */
 public class CubeCase {
 	//0x 0 0  0  0  0  0  0  0
 	//  v7 v6 v5 v4 v3 v2 v1 v0
-	int _x,_y,_z;
-//	byte _vertex;
 	byte _vertex;
 	List<Triangle> _triangle_list;
 
 	
-	public boolean checkRealPoint(int index) {
+	private boolean checkRealPoint(int index) {
 		if(((get_vertex()>>index)&1) == 1)
 			return true;
 		else
@@ -98,18 +80,6 @@ public class CubeCase {
 		this._vertex = vertex;
 	}
 	
-	public void set_coordinate(int x,int y,int z) {
-		_x = x;
-		_y = y;
-		_z = z;
-	}
-	public int[] get_coordinate() {
-		int[] temp = new int[3];
-		temp[0] = _x;
-		temp[1] = _y;
-		temp[2] = _z;
-		return temp;
-	}
 	public List<Triangle> get_Triangle() {
 		return _triangle_list;
 	}
