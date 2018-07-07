@@ -19,7 +19,6 @@ public class MenuBar extends JMenuBar {
 	private JMenu _menu2d;
 	private JMenu _menu3d;
 	private JMenu _menuTools;
-	private JMenu _menuTools3D;
 	private JMenuItem _no_entries2d;
 	private JMenuItem _no_entries3d;
 	private InfoWindow _info_frame;
@@ -49,7 +48,6 @@ public class MenuBar extends JMenuBar {
 		_menu2d = new JMenu("2D View");
 		_menu3d = new JMenu("3D View");
 		_menuTools = new JMenu("Tools");
-		_menuTools3D = new JMenu("3D Tools");
 		_info_frame = null;		
 
 		// -------------------------------------------------------------------------------------
@@ -121,7 +119,30 @@ public class MenuBar extends JMenuBar {
 		item = new JCheckBoxMenuItem(new String("Show original Data"), false);		
 		item.addActionListener(toggleBGListener3d);		
 		_menu3d.add(item);
+		JRadioButtonMenuItem rbMenuItem3d;
+		ButtonGroup group3d = new ButtonGroup();
 
+		rbMenuItem3d = new JRadioButtonMenuItem("Default");
+		rbMenuItem3d.addActionListener(setViewModeListener3D);
+		group3d.add(rbMenuItem3d);
+		_menu3d.add(rbMenuItem3d);
+		rbMenuItem3d.setSelected(true);
+		
+		rbMenuItem3d = new JRadioButtonMenuItem("Texture 2D");
+		rbMenuItem3d.addActionListener(setViewModeListener3D);
+		group3d.add(rbMenuItem3d);
+		_menu3d.add(rbMenuItem3d);
+
+		rbMenuItem3d = new JRadioButtonMenuItem("Point Cloud");
+		rbMenuItem3d.addActionListener(setViewModeListener3D);
+		group3d.add(rbMenuItem3d);
+		_menu3d.add(rbMenuItem3d);
+
+		rbMenuItem3d = new JRadioButtonMenuItem("Marching Cube");
+		rbMenuItem3d.addActionListener(setViewModeListener3D);
+		group3d.add(rbMenuItem3d);
+		_menu3d.add(rbMenuItem3d);
+		
 		_menu3d.addSeparator();		
 
 		_no_entries3d = new JMenuItem(new String("no segmentations yet"));
@@ -146,23 +167,12 @@ public class MenuBar extends JMenuBar {
 		item.addActionListener(setWindowWidthCenterListener);
 		_menuTools.add(item);
 		
-		// addition in exercise 5.2
-		item = new JMenuItem(new String("setting 3D"));
-		item.addActionListener(settingFor3DListener);
-		_menuTools3D.add(item);
-		// addition in exercise 6
-		JRadioButtonMenuItem rbdisplay;
-		rbdisplay = new JRadioButtonMenuItem("3d display");
-		rbdisplay.addActionListener(selectDisplay3DListener);
-		_menuTools3D.add(rbdisplay);
-
 		// -------------------------------------------------------------------------------------
 
 		add(_menuFile);
 		add(_menu2d);
 		add(_menu3d);
 		add(_menuTools);
-		add(_menuTools3D);
 	}
 
 	/**
@@ -283,13 +293,30 @@ public class MenuBar extends JMenuBar {
 			}
 		}
 	};
-	
+	/**
+	 * Actionlistener for changing the 3d viewmode.
+	 */
+	ActionListener setViewModeListener3D = new ActionListener() {
+		public void actionPerformed(ActionEvent event) {			
+			String name = event.getActionCommand();
+			if (name.equals("Default")) {
+				_v3d.setViewMode(0);
+			}else if (name.equals("Texture 2D")) {
+				_v3d.setViewMode(1);
+			} else if (name.equals("Point Cloud")) {
+				_v3d.setViewMode(2);				
+			} else if (name.equals("Marching Cube")) {
+				_v3d.setViewMode(3);
+			}
+		}
+	};
+
 	//addition in exercise 4
 	ActionListener setWindowWidthCenterListener = new ActionListener() {
 		public void actionPerformed(ActionEvent event) {	
 			//_tools.showTool(new ToolWindowSelector());
 			JFrame frame = new JFrame("setting");
-			frame.setSize(800, 300);
+			frame.setSize(800, 400);
 	        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	        
 	        frame.add(new ToolWindowSelector());
 			frame.setVisible(true);
@@ -300,22 +327,6 @@ public class MenuBar extends JMenuBar {
 			_v2d.selectRegionGrowOrNot();
 		}
 	};	
-	//addition in exercise 5.2
-	ActionListener settingFor3DListener = new ActionListener() {
-		public void actionPerformed(ActionEvent event) {	
-			JFrame frame = new JFrame("Setting");
-			frame.setSize(800, 300);
-	        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	        
-	        frame.add(new Tools3D());
-			frame.setVisible(true);	    
-		}
-	};
-	//addition in exercise 6.2
-	ActionListener selectDisplay3DListener = new ActionListener() {
-		public void actionPerformed(ActionEvent event) {	
-			_v3d.selectDisplay3D();
-		}
-	};
 
 	/**
 	 * ActionListener for toggling the 2d background image.

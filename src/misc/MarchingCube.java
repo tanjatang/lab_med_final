@@ -25,28 +25,40 @@ import java.util.Queue;
  * e11(3,7)
  */
 public class MarchingCube {
-	final float SCALE = 128.0f;
-	final double[] e0_x = {0f,-1*SCALE,1*SCALE};
-	final double[] e1_x = {1*SCALE,0f,1*SCALE};
-	final double[] e2_x = {0f,1*SCALE,1*SCALE};
-	final double[] e3_x = {-1*SCALE,0f,1*SCALE};
-	final double[] e4_x = {0f,-1*SCALE,-1*SCALE};
-	final double[] e5_x = {1*SCALE,0f,-1*SCALE};
-	final double[] e6_x = {0f,1*SCALE,-1*SCALE};
-	final double[] e7_x = {-1*SCALE,0f,-1*SCALE};
-	final double[] e8_x = {-1*SCALE,-1*SCALE,0f};
-	final double[] e9_x = {1*SCALE,-1*SCALE,0f};
-	final double[] e10_x = {1*SCALE,1*SCALE,0f};
-	final double[] e11_x = {-1*SCALE,1*SCALE,0f};
+	final float SCALE = 1f;
+	final float[] e0_x = {0f,-1*SCALE,1*SCALE};
+	final float[] e1_x = {1*SCALE,0f,1*SCALE};
+	final float[] e2_x = {0f,1*SCALE,1*SCALE};
+	final float[] e3_x = {-1*SCALE,0f,1*SCALE};
+	final float[] e4_x = {0f,-1*SCALE,-1*SCALE};
+	final float[] e5_x = {1*SCALE,0f,-1*SCALE};
+	final float[] e6_x = {0f,1*SCALE,-1*SCALE};
+	final float[] e7_x = {-1*SCALE,0f,-1*SCALE};
+	final float[] e8_x = {-1*SCALE,-1*SCALE,0f};
+	final float[] e9_x = {1*SCALE,-1*SCALE,0f};
+	final float[] e10_x = {1*SCALE,1*SCALE,0f};
+	final float[] e11_x = {-1*SCALE,1*SCALE,0f};
 	
+	final float[][] ROT_matrix_left = {{0f,0f,-1f},
+			{0f,1f,0f},
+			{1f,0f,0f}};
+	final float[][] ROT_matrix_up = {{1f,0f,0f},
+			{0f,0f,1f},
+			{0f,-1f,0f}};
+
+
+
 	private HashMap<Integer,CubeCase> _table;
+	private CubeCase[] _table_new;
 				
-	public MarchingCube() {
+	public MarchingCube(float size) {
 		_table = new HashMap<Integer,CubeCase>();
+		_table_new = new CubeCase[256];
+//		SCALE = size;
 		createTable();
 	}
 	public CubeCase get_Cube_From_Lib(int index) {
-		return _table.get(index);
+		return _table_new[index];
 	}
 	
 	private void createTable() {
@@ -60,15 +72,19 @@ public class MarchingCube {
 		 while(!basic_cube.isEmpty()) {
 			 CubeCase[] current = new CubeCase[2];
 			 CubeCase temp = basic_cube.poll();
-			 current[0] = temp.rotate_left();
-			 current[1] = temp.rotate_up();
+			 current[0] = rotate_left(temp);
+			 current[1] = rotate_up(temp);
 			 for(CubeCase cur: current) {
 				 if(!_table.containsKey((int)cur.get_vertex())) {
 					 _table.put((int)cur.get_vertex(), cur);
 					 basic_cube.offer(cur);
 				 }
 			 }			 
-		 }		 
+		 }
+		 
+		 for(int i=1;i<256;i++) {
+			 _table_new[i] = _table.get(i);
+		 }
 	}
 	private CubeCase selectBasisCase(int index) {
 		CubeCase current = new CubeCase(0, null);
@@ -124,12 +140,15 @@ public class MarchingCube {
 		byte index = (byte) (0xff^org.get_vertex());
 		ArrayList<Triangle> list_triangle = new ArrayList<Triangle>();
 		for(Triangle tri: org.get_Triangle()) {			
-			double[] temp = tri.get_E(0);
+			float[] temp = tri.get_E(0);
 			Triangle triangle = new Triangle(tri.get_E(1), 
 					temp, tri.get_E(2));
 			list_triangle.add(triangle);
 		}
-		CubeCase current = new CubeCase(index, list_triangle);
+		Triangle[] tri_n = new Triangle[list_triangle.size()];
+		for(int i=0;i<list_triangle.size();i++)
+			tri_n[i] = list_triangle.get(i);
+		CubeCase current = new CubeCase(index,tri_n);	
 		return current;
 	}
 	
@@ -138,7 +157,10 @@ public class MarchingCube {
 		ArrayList<Triangle> tri= new ArrayList<Triangle>();
 		Triangle t1 = new Triangle(e0_x, e8_x, e3_x);
 		tri.add(t1);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);		
 		return basis;
 	}
 	private CubeCase createBasicCase2() {
@@ -148,7 +170,10 @@ public class MarchingCube {
 		Triangle t2 = new Triangle(e9_x, e3_x, e1_x);
 		tri.add(t1);
 		tri.add(t2);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);			
 		return basis;
 	}
 	private CubeCase createBasicCase3() {
@@ -159,7 +184,10 @@ public class MarchingCube {
 		Triangle t2 = new Triangle(e2_x, e10_x, e1_x);
 		tri.add(t1);
 		tri.add(t2);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);	
 		return basis;
 	}
 	private CubeCase createBasicCase4() {
@@ -171,7 +199,10 @@ public class MarchingCube {
 		tri.add(t1);
 		tri.add(t2);
 		tri.add(t3);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);	
 		return basis;
 	}
 	private CubeCase createBasicCase5() {
@@ -182,7 +213,10 @@ public class MarchingCube {
 		Triangle t2 = new Triangle(e7_x, e1_x, e5_x);
 		tri.add(t1);
 		tri.add(t2);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);			
 		return basis;
 	}
 	private CubeCase createBasicCase6() {
@@ -197,7 +231,10 @@ public class MarchingCube {
 		tri.add(t2);
 		tri.add(t3);
 		tri.add(t4);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);			
 		return basis;
 	}
 	private CubeCase createBasicCase7() {
@@ -212,7 +249,10 @@ public class MarchingCube {
 		tri.add(t2);
 		tri.add(t3);
 		tri.add(t4);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);	
 		return basis;
 	}
 	private CubeCase createBasicCase8() {
@@ -227,7 +267,10 @@ public class MarchingCube {
 		tri.add(t2);
 		tri.add(t3);
 		tri.add(t4);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);			
 		return basis;
 	}	
 	private CubeCase createBasicCase9() {
@@ -242,7 +285,10 @@ public class MarchingCube {
 		tri.add(t2);
 		tri.add(t3);
 		tri.add(t4);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);			
 		return basis;
 	}
 	private CubeCase createBasicCase10() {
@@ -254,7 +300,10 @@ public class MarchingCube {
 		
 		tri.add(t1);
 		tri.add(t2);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);			
 		return basis;
 	}
 	private CubeCase createBasicCase11() {
@@ -267,7 +316,10 @@ public class MarchingCube {
 		tri.add(t1);
 		tri.add(t2);			
 		tri.add(t3);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);			
 		return basis;
 	}
 	private CubeCase createBasicCase12() {
@@ -280,7 +332,10 @@ public class MarchingCube {
 		tri.add(t1);
 		tri.add(t2);			
 		tri.add(t3);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);		
 		return basis;
 	}
 	private CubeCase createBasicCase13() {
@@ -295,7 +350,10 @@ public class MarchingCube {
 		tri.add(t2);			
 		tri.add(t3);
 		tri.add(t4);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);		
 		return basis;
 	}
 	private CubeCase createBasicCase14() {
@@ -310,8 +368,92 @@ public class MarchingCube {
 		tri.add(t2);			
 		tri.add(t3);
 		tri.add(t4);
-		CubeCase basis = new CubeCase(b,tri);		
+		Triangle[] tri_n = new Triangle[tri.size()];
+		for(int i=0;i<tri.size();i++)
+			tri_n[i] = tri.get(i);
+		CubeCase basis = new CubeCase(b,tri_n);			
 		return basis;
 	}
+	
+	
+	public CubeCase rotate_left(CubeCase old) {
+		CubeCase current = new CubeCase(0x00, null);
+		byte old_vertex = old._vertex;
+		byte new_vertex = 0x00;
+		new_vertex +=(byte) ((old_vertex & 0x02)>>1);
+		new_vertex +=(byte) ((old_vertex & 0x20)>>4);
+		new_vertex +=(byte) ((old_vertex & 0x40)>>4);
+		new_vertex +=(byte) ((old_vertex & 0x04)<<1);
+		new_vertex +=(byte) ((old_vertex & 0x01)<<4);
+		new_vertex +=(byte) ((old_vertex & 0x10)<<1);
+		new_vertex +=(byte) ((old_vertex & 0x80)>>1);
+		new_vertex +=(byte) ((old_vertex & 0x08)<<4);
+		
+		ArrayList<Triangle> cur_coor = new ArrayList();
+		for(Triangle temp :old._triangle_list_new) {
+			cur_coor.add(rot_left(temp));
+		}		
+		current.set_vertex(new_vertex);
+		Triangle[] tri_n = new Triangle[cur_coor.size()];
+		for(int i=0;i<cur_coor.size();i++)
+			tri_n[i] = cur_coor.get(i);
+		current.set_Triangle(tri_n);
+		return current;		
+	}
+	
+	public CubeCase rotate_up(CubeCase old) {
+		CubeCase current = new CubeCase(0x00, null);
+		byte old_vertex = old._vertex;
+		byte new_vertex = 0x00;
+		new_vertex +=(byte) ((old_vertex & 0x10)>>4);//
+		new_vertex +=(byte) ((old_vertex & 0x20)>>4);//
+		new_vertex +=(byte) ((old_vertex & 0x02)<<1);//
+		new_vertex +=(byte) ((old_vertex & 0x01)<<3);//
+		new_vertex +=(byte) ((old_vertex & 0x80)>>3);//
+		new_vertex +=(byte) ((old_vertex & 0x40)>>1);//
+		new_vertex +=(byte) ((old_vertex & 0x04)<<4);
+		new_vertex +=(byte) ((old_vertex & 0x08)<<4);
+		
+		ArrayList<Triangle> cur_coor = new ArrayList();
+		for(Triangle temp :old._triangle_list_new) {
+			cur_coor.add(rot_up(temp));
+		}		
+		current.set_vertex(new_vertex);
+		Triangle[] tri_n = new Triangle[cur_coor.size()];
+		for(int i=0;i<cur_coor.size();i++)
+			tri_n[i] = cur_coor.get(i);
+		current.set_Triangle(tri_n);
+		return current;		
+	}
+	public Triangle rot_left(Triangle old) {		
+		Triangle current = new Triangle(new float[3], new float[3], new float[3]);
+		for(int i=0;i<3;i++)
+			current.set_E(i, multiplicationOfMatrix(ROT_matrix_left,old.get_E(i)));
+		return current;
+	}
+	public Triangle rot_up(Triangle old) {		
+		Triangle current = new Triangle(new float[3], new float[3], new float[3]);
+		for(int i=0;i<3;i++)
+			current.set_E(i, multiplicationOfMatrix(ROT_matrix_up,old.get_E(i)));
+		return current;
+	}
+	
+ 	public float[] multiplicationOfMatrix(float[][] matrix,float[] coordinate) {
+		int dimM = coordinate.length;
+		float[] tmp = new float[dimM];
+		try {
+			for(int i=0;i<dimM;i++) {
+				float sum = 0;
+				for(int j=0;j<dimM;j++) {
+					sum = sum+ matrix[i][j] * coordinate[j];
+				}
+				tmp[i] = sum;
+			}
+		}catch(ArrayIndexOutOfBoundsException e){
+			System.out.println("Exception thrown  :" + e);
+		}
+		return tmp;
+	}
+
 
 }
