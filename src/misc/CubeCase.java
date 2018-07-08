@@ -4,10 +4,7 @@
  */
 
 package misc;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.media.j3d.TriangleArray;
 
 public class CubeCase {
 	//0x 0 0  0  0  0  0  0  0
@@ -15,15 +12,8 @@ public class CubeCase {
 	byte _vertex;
 //	List<Triangle> _triangle_list;
 	Triangle[] _triangle_list_new;
-//	TriangleArray _triangle_array;
 
 	
-//	private boolean checkRealPoint(int index) {
-//		if(((get_vertex()>>index)&1) == 1)
-//			return true;
-//		else
-//			return false;
-//	}
 
 	public CubeCase(int vertex, Triangle[] triangle) {
 		// TODO Auto-generated constructor stub

@@ -2,17 +2,11 @@ package misc;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Stack;
 
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
-import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
 import com.sun.j3d.utils.behaviors.mouse.MouseWheelZoom;
-import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
-import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.geometry.NormalGenerator;
 import com.sun.j3d.utils.universe.*;
@@ -25,16 +19,12 @@ import main.Viewport2d;
 import main.Segment;
 
 import javax.media.j3d.*;
-import javax.vecmath.Color3b;
 import javax.vecmath.Color3f;
-import javax.vecmath.Color4b;
 import javax.vecmath.Color4f;
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
-import javax.vecmath.Point4d;
 import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 /**
@@ -53,7 +43,6 @@ public class Viewport3d extends Viewport implements Observer {
 	private int _xaxis,_yaxis,_zaxis;
 	public MarchingCube _marchingCube;
 	private int[] _idxs;
-	private long _old_time;
 	private int _view_model;
 	final int DEFAULT_CASE = 0;
 	final int TEXTURE_2D = 1;
@@ -146,7 +135,6 @@ public class Viewport3d extends Viewport implements Observer {
 		for(int i=0;i<_idxs.length;i++)
 			_idxs[i] = i;
 		
-		_old_time = 0;
 		_view_model = 0;
 		_marching_cube_shape = createText("no segment currently",_scale);
 	}
@@ -179,7 +167,7 @@ public class Viewport3d extends Viewport implements Observer {
 		if (m._type == Message.M_SEG_CHANGED) {
 			String seg_name = ((Segment)m._obj).getName();
 			boolean update_needed = _map_name_to_seg.containsKey(seg_name);
-			if (update_needed) {//&&(current_time-_last_time>1000) 
+			if (update_needed) {
 				_seg_name = seg_name;				
 				update_view();
 			}
@@ -226,7 +214,6 @@ public class Viewport3d extends Viewport implements Observer {
 			return null;
 
 		GeometryArray geometrypoints = new PointArray(count, PointArray.COORDINATES);
-		//System.out.println("length: "+count);
 		geometrypoints.setCoordinates(0,points,0,count);
 		PointAttributes pa = new PointAttributes(); // 定义点的特征 pa.setPointSize(5.0f);
 		pa.setPointSize(1.0f);
@@ -500,7 +487,6 @@ public class Viewport3d extends Viewport implements Observer {
 	}
 	
 	private int calculate_index(int x,int y,int size,BitMask mask1,BitMask mask2) {
-//		boolean[] v = new boolean[8];
 		int[] v = new int[8];
 		v[0] = mask2.get(x, y) ?1:0;
 		v[1] = mask2.get(x+size, y) ?1:0;
@@ -524,7 +510,7 @@ public class Viewport3d extends Viewport implements Observer {
 		int y=0;
 		int z=0;
 		int active_id = _slices.getActiveImageID();
-		byte[] bs =  new byte[4];
+//		byte[] bs =  new byte[4];
 		if(_view2d.get_slice_names().isEmpty()) {
 			x=0;y=0;z=0;
 		}else {
@@ -533,7 +519,7 @@ public class Viewport3d extends Viewport implements Observer {
 			Point3d p2 = new Point3d();
 			Point3d p3 = new Point3d();
 			QuadArray sq = new QuadArray(12, QuadArray.COORDINATES|GeometryArray.TEXTURE_COORDINATE_2
-					);//| GeometryArray.COLOR_4
+					);
 			
 			switch (_view2d.get_viewmodel()) {
 			case 0:
@@ -542,8 +528,6 @@ public class Viewport3d extends Viewport implements Observer {
 				p1.set(128, -128, z);
 				p2.set(128, 128, z);
 				p3.set(-128, 128, z);
-				final byte[] bs1= {(byte)50,(byte)0,(byte)0,(byte)255};
-				bs = bs1;			
 				break;
 			case 1:
 				y = active_id-128;
@@ -551,8 +535,6 @@ public class Viewport3d extends Viewport implements Observer {
 				p1.set(128, y, -128);
 				p2.set(128, y, 128);
 				p3.set(-128, y, 128);
-				final byte[] bs2= {(byte)0, (byte)50, (byte)0, (byte)255};
-				bs = bs2;
 				break;
 			case 2:
 				x = active_id-128;
@@ -560,8 +542,6 @@ public class Viewport3d extends Viewport implements Observer {
 				p1.set(x, 128, -128);
 				p2.set(x, 128, 128);
 				p3.set(x, -128, 128);
-				final byte[] bs3= {(byte)0, (byte)0, (byte)50, (byte)255};
-				bs = bs3;
 				break;
 			default:
 				break;
@@ -594,11 +574,10 @@ public class Viewport3d extends Viewport implements Observer {
 //			pa.setCullFace(PolygonAttributes.CULL_NONE);
 			TextureAttributes texa = new TextureAttributes();
 			
-			texa.setTextureMode(TextureAttributes.COMBINE_ADD); //REPLACE 
+			texa.setTextureMode(TextureAttributes.COMBINE_ADD);  
 			texa.setTextureBlendColor(new Color4f(1.0f,1.0f,1.0f,0.0f));
 			ap_plane.setTextureAttributes(texa);
 			pa.setPolygonMode(PolygonAttributes.POLYGON_FILL);
-//			pa.setCullFace(PolygonAttributes.CULL_NONE);
 			
 			ap_plane.setPolygonAttributes(pa);
 			ap_plane.setTexture(tex);

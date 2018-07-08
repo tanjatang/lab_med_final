@@ -54,7 +54,6 @@ public class MarchingCube {
 	public MarchingCube(float size) {
 		_table = new HashMap<Integer,CubeCase>();
 		_table_new = new CubeCase[256];
-//		SCALE = size;
 		createTable();
 	}
 	public CubeCase get_Cube_From_Lib(int index) {
@@ -389,7 +388,7 @@ public class MarchingCube {
 		new_vertex +=(byte) ((old_vertex & 0x80)>>1);
 		new_vertex +=(byte) ((old_vertex & 0x08)<<4);
 		
-		ArrayList<Triangle> cur_coor = new ArrayList();
+		ArrayList<Triangle> cur_coor = new ArrayList<Triangle>();
 		for(Triangle temp :old._triangle_list_new) {
 			cur_coor.add(rot_left(temp));
 		}		
@@ -414,7 +413,7 @@ public class MarchingCube {
 		new_vertex +=(byte) ((old_vertex & 0x04)<<4);
 		new_vertex +=(byte) ((old_vertex & 0x08)<<4);
 		
-		ArrayList<Triangle> cur_coor = new ArrayList();
+		ArrayList<Triangle> cur_coor = new ArrayList<Triangle>();
 		for(Triangle temp :old._triangle_list_new) {
 			cur_coor.add(rot_up(temp));
 		}		
